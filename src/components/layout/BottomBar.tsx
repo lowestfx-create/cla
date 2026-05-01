@@ -1,0 +1,61 @@
+'use client'
+import Link from 'next/link'
+import { usePathname } from 'next/navigation'
+import { Home, Wand2, ShoppingCart, MessageCircle } from 'lucide-react'
+import { useCartStore } from '@/lib/store'
+import { cn } from '@/lib/utils'
+
+const tabs = [
+  { href: '/', icon: Home, labelTH: 'หน้าแรก', labelEN: 'Home' },
+  { href: '/customize', icon: Wand2, labelTH: 'Custom', labelEN: 'Custom', highlight: true },
+  { href: '/cart', icon: ShoppingCart, labelTH: 'ตะกร้า', labelEN: 'Cart' },
+]
+
+export default function BottomBar() {
+  const pathname = usePathname()
+  const totalItems = useCartStore((s) => s.items.reduce((sum, i) => sum + i.quantity, 0))
+
+  return (
+    <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-100 shadow-lg">
+      <div className="flex items-center justify-around h-16 px-2 pb-safe">
+        {tabs.map(({ href, icon: Icon, labelTH, highlight }) => {
+          const active = pathname === href
+          return (
+            <Link
+              key={href}
+              href={href}
+              className={cn(
+                'flex flex-col items-center gap-0.5 px-4 py-1.5 rounded-xl flex-1 transition-all duration-200',
+                highlight
+                  ? 'bg-brand-yellow text-brand-dark font-bold shadow-pill mx-1 -mt-3 rounded-2xl py-2.5'
+                  : active
+                  ? 'text-brand-dark'
+                  : 'text-brand-muted'
+              )}
+            >
+              <div className="relative">
+                <Icon size={22} strokeWidth={active || highlight ? 2.5 : 1.8} />
+                {href === '/cart' && totalItems > 0 && (
+                  <span className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-brand-red text-white text-[9px] font-bold rounded-full flex items-center justify-center">
+                    {totalItems}
+                  </span>
+                )}
+              </div>
+              <span className="text-[10px] font-display font-semibold">{labelTH}</span>
+            </Link>
+          )
+        })}
+
+        <a
+          href="https://line.me/ti/p/~@brickme"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex flex-col items-center gap-0.5 px-4 py-1.5 rounded-xl flex-1 text-brand-muted transition-all duration-200"
+        >
+          <MessageCircle size={22} strokeWidth={1.8} />
+          <span className="text-[10px] font-display font-semibold">LINE</span>
+        </a>
+      </div>
+    </nav>
+  )
+}
