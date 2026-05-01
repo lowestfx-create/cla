@@ -1,5 +1,5 @@
 'use client'
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, Suspense } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Undo2, Redo2, Shuffle, ShoppingCart, Share2, ChevronLeft, ChevronRight } from 'lucide-react'
@@ -98,7 +98,7 @@ const PRESETS: Record<string, Partial<CustomConfig>> = {
   gamer: { style: 'chibi', skin: '#FDBCB4', faceExpression: 'happy', hairStyle: 'mohawk', hairColor: '#4B0082', top: 'hoodie', topColor: '#1C1C1C', bottom: 'joggers', bottomColor: '#1C1C1C', shoes: 'sneakers', shoesColor: '#FF5722', accessories: ['glasses'], base: 'plain' },
 }
 
-export default function CustomizePage() {
+function CustomizePageInner() {
   const searchParams = useSearchParams()
   const router = useRouter()
   const { config, updateConfig, undo, redo, history, future, currentPrice } = useCustomizerStore()
@@ -539,6 +539,14 @@ export default function CustomizePage() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function CustomizePage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-brand-neutral flex items-center justify-center"><div className="text-brand-muted font-body">กำลังโหลด...</div></div>}>
+      <CustomizePageInner />
+    </Suspense>
   )
 }
 

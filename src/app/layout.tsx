@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import './globals.css'
 import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
@@ -26,7 +26,12 @@ export const metadata: Metadata = {
     description: 'Minifigure Custom 3D Printing คุณภาพสูง',
   },
   robots: { index: true, follow: true },
-  viewport: 'width=device-width, initial-scale=1, viewport-fit=cover',
+}
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  viewportFit: 'cover',
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
