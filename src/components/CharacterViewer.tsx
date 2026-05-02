@@ -29,20 +29,22 @@ function FaceModel({ url, bodyTopY }: { url: string; bodyTopY: number }) {
     box.getSize(size)
     const maxDim = Math.max(size.x, size.y, size.z)
 
-    const fScale = maxDim > 0 ? 0.70 / maxDim : 1
+    // Body STL includes a head — scale face to match built-in head proportions
+    // (LEGO head ~23% of total figure height = 0.23 × 2.2 ≈ 0.52 world units)
+    const fScale = maxDim > 0 ? 0.52 / maxDim : 1
 
-    // world_y of vertex at local ly = facePosition.y + ly * fScale
-    // We want face bottom (ly = box.min.y) to sit at bodyTopY - 0.04
-    // => facePosition.y = bodyTopY - 0.04 - box.min.y * fScale
-    const facePositionY = bodyTopY - 0.04 - box.min.y * fScale
+    // Neck (head-body joint) sits at ~50% of bodyTopY above centre
+    // bodyTopY ≈ 1.1 → neck ≈ 0.55 → face bottom goes there
+    const neckY = bodyTopY * 0.50
+    const facePositionY = neckY - box.min.y * fScale
 
     return {
       faceClone: clone,
       faceScale: fScale,
       facePosition: [
-        -center.x * fScale,   // center face on X
-        facePositionY,         // correct Y: face bottom sits on body top
-        -center.z * fScale,   // center face on Z
+        -center.x * fScale,
+        facePositionY,
+        -center.z * fScale,
       ] as [number, number, number],
     }
   }, [scene, bodyTopY])
