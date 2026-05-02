@@ -81,7 +81,8 @@ export default function CharacterPreview({ config }: Props) {
   } = config
 
   const stlUrl = STYLE_STLS[style ?? 'mini'] ?? STYLE_STLS.mini
-  const faceGlb = FACE_GLBS[faceExpression ?? ''] ?? null
+  // Only show face after user has selected one (faceExpression is non-empty)
+  const faceGlb = faceExpression ? (FACE_GLBS[faceExpression] ?? null) : null
 
   const mouths: Record<string, string> = {
     smile:   `M ${eyeL-1} ${eyeY+16} Q 60 ${eyeY+24} ${eyeR+1} ${eyeY+16}`,

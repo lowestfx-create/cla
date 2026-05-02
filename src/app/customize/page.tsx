@@ -367,7 +367,7 @@ function CustomizePageInner() {
                                 <CharacterViewer
                                   bodyUrl={s.stl}
                                   bodyColor={isSelected ? '#DA291C' : '#4A90D9'}
-                                  faceUrl={FACES.find(f => f.id === config.faceExpression)?.glb ?? null}
+                                  faceUrl={null}
                                   skinColor={config.skin ?? '#FDBCB4'}
                                   className="w-full h-full"
                                   interactive={false}
