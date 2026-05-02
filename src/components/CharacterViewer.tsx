@@ -34,19 +34,26 @@ function FaceModel({ url, bodyTopY }: { url: string; bodyTopY: number }) {
   const { faceClone, faceScale, facePosition } = useMemo(() => {
     const clone = scene.clone(true)
 
-    // GLTF loads textures with flipY=false (V=0 at bottom in WebGL).
-    // Mecabricks UV has front expression at V<0.5 = TOP of image.
-    // With flipY=false, V<0.5 maps to bottom → shows BACK expression.
-    // Fix: flip all textures so V=0 maps to top → front expression shows correctly.
+    // Fix texture V-axis: GLTFLoader sets flipY=false, which causes the front
+    // expression (upper PNG half) to sample from the wrong UV region.
+    // We CLONE each texture (new GPU object) and set flipY=true before the
+    // first upload — this preserves colorSpace and all material properties.
     clone.traverse((obj) => {
       const mesh = obj as THREE.Mesh
       if (!mesh.isMesh) return
       const mats = Array.isArray(mesh.material) ? mesh.material : [mesh.material]
-      mats.forEach((mat) => {
-        const m = mat as THREE.MeshStandardMaterial
-        if (m.map) { m.map.flipY = true; m.map.needsUpdate = true }
+      const newMats = mats.map((origMat) => {
+        const orig = origMat as THREE.MeshStandardMaterial
+        if (!orig.map) return origMat   // solid-colour meshes (stud etc.) untouched
+        const m = orig.clone()
+        const t = orig.map.clone()      // fresh GPU object → upload with flipY=true
+        t.flipY = true
+        t.needsUpdate = true
+        m.map = t
         m.needsUpdate = true
+        return m
       })
+      mesh.material = Array.isArray(mesh.material) ? newMats : newMats[0]
     })
 
     const box = new THREE.Box3().setFromObject(clone)
@@ -76,7 +83,7 @@ function FaceModel({ url, bodyTopY }: { url: string; bodyTopY: number }) {
         -center.z * fScale,
       ] as [number, number, number],
     }
-  }, [scene, bodyTopY])
+  }, [scene, bodyTopY, texture])
 
   return (
     <group scale={faceScale} position={facePosition}>
