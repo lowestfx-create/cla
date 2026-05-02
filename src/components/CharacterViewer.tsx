@@ -34,28 +34,6 @@ function FaceModel({ url, bodyTopY }: { url: string; bodyTopY: number }) {
   const { faceClone, faceScale, facePosition } = useMemo(() => {
     const clone = scene.clone(true)
 
-    // Fix texture V-axis: GLTFLoader sets flipY=false, which causes the front
-    // expression (upper PNG half) to sample from the wrong UV region.
-    // We CLONE each texture (new GPU object) and set flipY=true before the
-    // first upload — this preserves colorSpace and all material properties.
-    clone.traverse((obj) => {
-      const mesh = obj as THREE.Mesh
-      if (!mesh.isMesh) return
-      const mats = Array.isArray(mesh.material) ? mesh.material : [mesh.material]
-      const newMats = mats.map((origMat) => {
-        const orig = origMat as THREE.MeshStandardMaterial
-        if (!orig.map) return origMat   // solid-colour meshes (stud etc.) untouched
-        const m = orig.clone()
-        const t = orig.map.clone()      // fresh GPU object → upload with flipY=true
-        t.flipY = true
-        t.needsUpdate = true
-        m.map = t
-        m.needsUpdate = true
-        return m
-      })
-      mesh.material = Array.isArray(mesh.material) ? newMats : newMats[0]
-    })
-
     const box = new THREE.Box3().setFromObject(clone)
     const center = new THREE.Vector3()
     box.getCenter(center)
