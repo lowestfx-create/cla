@@ -31,7 +31,7 @@ interface AppStore {
 }
 
 const defaultConfig: CustomConfig = {
-  style: 'classic',
+  style: 'mini',
   skin: '#FDBCB4',
   faceExpression: 'smile',
   hairStyle: 'short-straight',

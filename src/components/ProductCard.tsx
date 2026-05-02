@@ -13,9 +13,9 @@ interface ProductCardProps {
 }
 
 const badgeConfig = {
-  bestseller: { label: 'ขายดี', color: 'bg-brand-yellow text-brand-dark' },
-  new: { label: 'ใหม่', color: 'bg-brand-red text-white' },
-  sale: { label: 'พิเศษ', color: 'bg-green-500 text-white' },
+  bestseller: { label: 'ขายดี', bg: 'bg-brand-yellow text-brand-dark' },
+  new: { label: 'ใหม่', bg: 'bg-brand-red text-white' },
+  sale: { label: 'พิเศษ', bg: 'bg-brand-green text-white' },
 }
 
 export default function ProductCard({ product, lang = 'th' }: ProductCardProps) {
@@ -24,15 +24,16 @@ export default function ProductCard({ product, lang = 'th' }: ProductCardProps) 
 
   return (
     <motion.article
-      className="card overflow-hidden group cursor-pointer"
-      whileHover={{ scale: 1.02 }}
-      transition={{ duration: 0.2 }}
+      className="bg-white rounded-lg border-3 border-brand-dark shadow-brick overflow-hidden group cursor-pointer"
+      whileHover={{ x: -1, y: -1 }}
+      animate={hovered ? { boxShadow: '6px 6px 0px #1A1A1A' } : { boxShadow: '4px 4px 0px #1A1A1A' }}
+      transition={{ duration: 0.08 }}
       onHoverStart={() => setHovered(true)}
       onHoverEnd={() => setHovered(false)}
     >
-      <Link href={`/product/${product.slug}`} aria-label={name} className="focus-ring rounded-2xl block">
+      <Link href={`/product/${product.slug}`} aria-label={name} className="focus-ring rounded-t-lg block">
         {/* Image */}
-        <div className="relative aspect-square overflow-hidden bg-brand-neutral">
+        <div className="relative aspect-square overflow-hidden bg-brand-neutral border-b-3 border-brand-dark">
           <Image
             src={hovered && product.images[1] ? product.images[1] : product.images[0]}
             alt={name}
@@ -44,8 +45,8 @@ export default function ProductCard({ product, lang = 'th' }: ProductCardProps) 
           {/* Badge */}
           {product.badge && (
             <span className={cn(
-              'absolute top-3 left-3 px-2.5 py-1 rounded-full text-xs font-display font-bold shadow-sm',
-              badgeConfig[product.badge].color
+              'absolute top-2.5 left-2.5 px-2.5 py-1 rounded-md text-xs font-display font-black border-2 border-brand-dark shadow-brick-sm',
+              badgeConfig[product.badge].bg
             )}>
               {badgeConfig[product.badge].label}
             </span>
@@ -55,22 +56,22 @@ export default function ProductCard({ product, lang = 'th' }: ProductCardProps) 
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: hovered ? 1 : 0 }}
-            className="absolute inset-0 bg-brand-dark/20 flex items-center justify-center"
+            className="absolute inset-0 bg-brand-dark/30 flex items-center justify-center"
           >
-            <span className="bg-white text-brand-dark font-display font-bold px-4 py-2 rounded-xl text-sm shadow-lg">
+            <span className="bg-brand-yellow text-brand-dark font-display font-black px-4 py-2 rounded-lg border-3 border-brand-dark shadow-brick-sm text-sm">
               ดูรายละเอียด
             </span>
           </motion.div>
         </div>
 
         {/* Info */}
-        <div className="p-4">
-          <p className="font-display font-bold text-brand-dark truncate">{name}</p>
-          <p className="font-body text-brand-muted text-sm mt-0.5 line-clamp-2">
+        <div className="p-4 pb-2">
+          <p className="font-display font-black text-brand-dark truncate">{name}</p>
+          <p className="font-body text-brand-muted text-xs mt-0.5 line-clamp-2">
             {lang === 'th' ? product.descriptionTH : product.description}
           </p>
-          <div className="flex items-center justify-between mt-3">
-            <span className="font-display font-black text-lg text-brand-dark">
+          <div className="mt-3">
+            <span className="font-display font-black text-xl text-brand-dark">
               {lang === 'th' ? `เริ่ม ${product.price.toLocaleString()}฿` : `From ฿${product.price.toLocaleString()}`}
             </span>
           </div>
@@ -78,13 +79,13 @@ export default function ProductCard({ product, lang = 'th' }: ProductCardProps) 
       </Link>
 
       {/* Custom CTA */}
-      <div className="px-4 pb-4">
+      <div className="px-4 pb-4 pt-2">
         <Link
           href={`/customize${product.preset ? `?preset=${product.preset}` : ''}`}
-          className="w-full btn-primary text-sm py-2.5 justify-center gap-2"
+          className="w-full inline-flex items-center justify-center gap-2 py-2.5 bg-brand-yellow text-brand-dark font-display font-black text-sm rounded-lg border-3 border-brand-dark shadow-brick-sm hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all duration-75"
           aria-label={`Custom จากแบบ ${name}`}
         >
-          <Wand2 size={15} />
+          <Wand2 size={14} />
           Custom จากแบบนี้
         </Link>
       </div>

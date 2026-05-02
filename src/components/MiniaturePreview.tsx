@@ -7,11 +7,10 @@ interface MiniaturePreviewProps {
   size?: 'sm' | 'md' | 'lg'
 }
 
-const STYLE_HEIGHTS: Record<string, number> = { classic: 180, chibi: 160, realistic: 200 }
+const STYLE_HEIGHTS: Record<string, number> = { mini: 180, normal: 200 }
 
 export default function MiniaturePreview({ config, size = 'lg' }: MiniaturePreviewProps) {
   const h = STYLE_HEIGHTS[config.style] ?? 180
-  const isChibi = config.style === 'chibi'
 
   const sizeClass = { sm: 'w-28 h-36', md: 'w-40 h-52', lg: 'w-56 h-72' }[size]
 
@@ -37,34 +36,30 @@ export default function MiniaturePreview({ config, size = 'lg' }: MiniaturePrevi
         )}
 
         {/* ── Legs ── */}
-        <rect x="32" y="100" width={isChibi ? 20 : 18} height={isChibi ? 26 : 30} rx="6"
+        <rect x="32" y="100" width={18} height={30} rx="6"
           fill={config.bottomColor} />
-        <rect x={isChibi ? 60 : 62} y="100" width={isChibi ? 20 : 18} height={isChibi ? 26 : 30} rx="6"
+        <rect x={62} y="100" width={18} height={30} rx="6"
           fill={config.bottomColor} />
 
         {/* ── Shoes ── */}
-        <rect x="30" y="122" width={isChibi ? 23 : 21} height="10" rx="5" fill={config.shoesColor} />
-        <rect x={isChibi ? 59 : 61} y="122" width={isChibi ? 23 : 21} height="10" rx="5" fill={config.shoesColor} />
+        <rect x="30" y="122" width={21} height="10" rx="5" fill={config.shoesColor} />
+        <rect x={61} y="122" width={21} height="10" rx="5" fill={config.shoesColor} />
 
         {/* ── Body / Top ── */}
-        <rect x="26" y="68" width="60" height={isChibi ? 30 : 36} rx="8" fill={config.topColor} />
+        <rect x="26" y="68" width="60" height={36} rx="8" fill={config.topColor} />
 
         {/* Arms */}
-        <rect x="8" y="70" width="16" height={isChibi ? 24 : 28} rx="7" fill={config.topColor} />
-        <rect x="88" y="70" width="16" height={isChibi ? 24 : 28} rx="7" fill={config.topColor} />
+        <rect x="8" y="70" width="16" height={28} rx="7" fill={config.topColor} />
+        <rect x="88" y="70" width="16" height={28} rx="7" fill={config.topColor} />
         {/* Hands */}
-        <circle cx="16" cy={isChibi ? 100 : 104} r="7" fill={config.skin} />
-        <circle cx="96" cy={isChibi ? 100 : 104} r="7" fill={config.skin} />
+        <circle cx="16" cy={104} r="7" fill={config.skin} />
+        <circle cx="96" cy={104} r="7" fill={config.skin} />
 
         {/* ── Neck ── */}
         <rect x="46" y="58" width="20" height="14" rx="4" fill={config.skin} />
 
         {/* ── Head ── */}
-        {isChibi ? (
-          <rect x="20" y="16" width="72" height="48" rx="20" fill={config.skin} />
-        ) : (
-          <rect x="28" y="18" width="56" height="44" rx="16" fill={config.skin} />
-        )}
+        <rect x="28" y="18" width="56" height="44" rx="16" fill={config.skin} />
 
         {/* ── Face expression ── */}
         {config.faceExpression === 'smile' && (

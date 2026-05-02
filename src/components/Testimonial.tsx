@@ -21,10 +21,10 @@ export default function TestimonialCarousel({ items }: TestimonialCarouselProps)
     <div className="relative">
       <motion.div
         key={current}
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.35 }}
-        className="bg-white rounded-3xl p-8 md:p-10 shadow-card max-w-2xl mx-auto text-center"
+        transition={{ duration: 0.25 }}
+        className="bg-brand-yellow rounded-lg border-3 border-brand-dark shadow-brick-lg p-8 md:p-10 max-w-2xl mx-auto text-center"
       >
         {/* Stars */}
         <div className="flex justify-center gap-1 mb-5">
@@ -32,19 +32,19 @@ export default function TestimonialCarousel({ items }: TestimonialCarouselProps)
             <Star
               key={i}
               size={20}
-              className={i < item.rating ? 'fill-brand-yellow text-brand-yellow' : 'text-gray-200 fill-gray-200'}
+              className={i < item.rating ? 'fill-brand-dark text-brand-dark' : 'text-brand-dark/20 fill-brand-dark/20'}
             />
           ))}
         </div>
 
         {/* Quote */}
-        <blockquote className="font-body text-brand-dark text-lg leading-relaxed mb-6">
+        <blockquote className="font-body text-brand-dark text-lg leading-relaxed mb-6 font-medium">
           &ldquo;{item.comment}&rdquo;
         </blockquote>
 
         {/* Author */}
         <div className="flex items-center justify-center gap-3">
-          <div className="relative w-12 h-12 rounded-full overflow-hidden bg-brand-neutral">
+          <div className="relative w-12 h-12 rounded-lg overflow-hidden border-3 border-brand-dark shadow-brick-sm bg-white">
             <Image
               src={item.avatar}
               alt={item.name}
@@ -54,8 +54,8 @@ export default function TestimonialCarousel({ items }: TestimonialCarouselProps)
             />
           </div>
           <div className="text-left">
-            <p className="font-display font-bold text-brand-dark text-sm">{item.name}</p>
-            <p className="font-body text-brand-muted text-xs">{item.productName} · {item.date}</p>
+            <p className="font-display font-black text-brand-dark text-sm">{item.name}</p>
+            <p className="font-body text-brand-dark/60 text-xs">{item.productName} · {item.date}</p>
           </div>
         </div>
       </motion.div>
@@ -64,7 +64,7 @@ export default function TestimonialCarousel({ items }: TestimonialCarouselProps)
       <div className="flex items-center justify-center gap-4 mt-6">
         <button
           onClick={prev}
-          className="w-10 h-10 bg-white rounded-full shadow-card flex items-center justify-center hover:bg-brand-yellow transition-colors duration-200 focus-ring"
+          className="w-10 h-10 bg-white rounded-lg border-3 border-brand-dark shadow-brick-sm hover:bg-brand-yellow hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-none flex items-center justify-center transition-all duration-75 focus-ring"
           aria-label="รีวิวก่อนหน้า"
         >
           <ChevronLeft size={18} />
@@ -75,7 +75,9 @@ export default function TestimonialCarousel({ items }: TestimonialCarouselProps)
             <button
               key={i}
               onClick={() => setCurrent(i)}
-              className={`w-2 h-2 rounded-full transition-all duration-200 ${i === current ? 'bg-brand-yellow w-6' : 'bg-gray-300'}`}
+              className={`h-3 rounded-sm border-2 border-brand-dark transition-all duration-200 ${
+                i === current ? 'bg-brand-dark w-8' : 'bg-brand-yellow w-3 hover:bg-brand-dark/40'
+              }`}
               aria-label={`รีวิวที่ ${i + 1}`}
             />
           ))}
@@ -83,7 +85,7 @@ export default function TestimonialCarousel({ items }: TestimonialCarouselProps)
 
         <button
           onClick={next}
-          className="w-10 h-10 bg-white rounded-full shadow-card flex items-center justify-center hover:bg-brand-yellow transition-colors duration-200 focus-ring"
+          className="w-10 h-10 bg-white rounded-lg border-3 border-brand-dark shadow-brick-sm hover:bg-brand-yellow hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-none flex items-center justify-center transition-all duration-75 focus-ring"
           aria-label="รีวิวถัดไป"
         >
           <ChevronRight size={18} />

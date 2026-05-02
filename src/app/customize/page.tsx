@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import {
   Undo2, Redo2, Shuffle, ShoppingCart, Share2, ChevronLeft, ChevronRight,
   Glasses, Sun, HardHat, Crown, Sword, Sparkles, Cat, Dog, BookOpen, Camera, Guitar, Coffee,
+  CheckCircle2,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { useCustomizerStore, useCartStore } from '@/lib/store'
@@ -257,7 +258,10 @@ function CustomizePageInner() {
       <div className="bg-white border-b-3 border-brand-dark sticky top-16 z-30 shadow-[0_3px_0_#FFD700]">
         <div className="container-site py-4">
           <div className="flex items-center justify-between gap-4 mb-3">
-            <h1 className="font-display font-black text-xl text-brand-dark">Custom ตัวละคร</h1>
+            <div>
+              <h1 className="font-display font-black text-xl text-brand-dark leading-none">Custom ตัวละคร</h1>
+              <p className="font-body text-brand-muted text-[10px] mt-0.5">สร้างตัวละครในแบบของคุณ</p>
+            </div>
             <div className="flex items-center gap-2">
               {[
                 { action: undo, icon: Undo2, disabled: history.length === 0, label: 'ย้อนกลับ' },
@@ -320,31 +324,74 @@ function CustomizePageInner() {
                 {step === 0 && (
                   <StepCard title="เลือกสไตล์ตัวละคร" desc="สไตล์จะกำหนดรูปแบบและราคาเริ่มต้น">
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                      {STYLES.map((s) => (
-                        <RadioCard
-                          key={s.id}
-                          selected={config.style === s.id}
-                          onClick={() => updateConfig({ style: s.id as CustomConfig['style'] })}
-                        >
-                          <div className="w-full h-52 rounded-lg overflow-hidden bg-brand-neutral border-2 border-brand-dark/10 mb-3">
-                            <Suspense fallback={
-                              <div className="w-full h-full flex items-center justify-center">
-                                <div className="w-8 h-8 border-4 border-brand-dark border-t-transparent rounded-full animate-spin" />
-                              </div>
-                            }>
-                              <BodyViewer
-                                url={s.stl}
-                                color={config.style === s.id ? '#DA291C' : '#3B82F6'}
-                                className="w-full h-full"
-                                interactive={false}
+                      {STYLES.map((s) => {
+                        const isSelected = config.style === s.id
+                        return (
+                          <motion.button
+                            key={s.id}
+                            whileTap={{ scale: 0.97 }}
+                            onClick={() => updateConfig({ style: s.id as CustomConfig['style'] })}
+                            className={`
+                              w-full rounded-xl border-3 text-left overflow-hidden transition-all duration-150 focus-ring
+                              ${isSelected
+                                ? 'border-brand-dark shadow-brick-lg'
+                                : 'border-brand-dark/40 shadow-brick hover:border-brand-dark hover:shadow-brick-lg'
+                              }
+                            `}
+                          >
+                            {/* 3D model area */}
+                            <div
+                              className="w-full relative overflow-hidden"
+                              style={{
+                                height: '200px',
+                                background: isSelected
+                                  ? 'linear-gradient(150deg, #0f172a 0%, #1e293b 50%, #7c1517 100%)'
+                                  : 'linear-gradient(150deg, #1e293b 0%, #334155 50%, #1e3a5f 100%)',
+                              }}
+                            >
+                              {/* stud overlay */}
+                              <div
+                                className="absolute inset-0 opacity-10"
+                                style={{
+                                  backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.7) 25%, transparent 25%)',
+                                  backgroundSize: '16px 16px',
+                                }}
                               />
-                            </Suspense>
-                          </div>
-                          <p className="font-display font-black text-brand-dark text-lg">{s.label}</p>
-                          <p className="font-body text-brand-muted text-sm mt-1">{s.desc}</p>
-                          <p className="font-display font-black text-brand-dark mt-2 text-lg">฿{s.price}</p>
-                        </RadioCard>
-                      ))}
+                              <Suspense fallback={
+                                <div className="w-full h-full flex items-center justify-center">
+                                  <div className="w-8 h-8 border-4 border-brand-yellow border-t-transparent rounded-full animate-spin" />
+                                </div>
+                              }>
+                                <BodyViewer
+                                  url={s.stl}
+                                  color={isSelected ? '#DA291C' : '#4A90D9'}
+                                  className="w-full h-full"
+                                  interactive={false}
+                                />
+                              </Suspense>
+
+                              {/* Selected badge */}
+                              {isSelected && (
+                                <div className="absolute top-2 right-2">
+                                  <span className="flex items-center gap-1 px-2 py-0.5 bg-brand-yellow border-2 border-brand-dark rounded-md text-[9px] font-display font-black text-brand-dark shadow-brick-sm">
+                                    <CheckCircle2 size={10} />
+                                    เลือกแล้ว
+                                  </span>
+                                </div>
+                              )}
+                            </div>
+
+                            {/* Info section */}
+                            <div className={`px-4 py-3 ${isSelected ? 'bg-brand-yellow' : 'bg-white'}`}>
+                              <div className="flex items-center justify-between">
+                                <p className="font-display font-black text-brand-dark text-lg">{s.label}</p>
+                                <p className="font-display font-black text-brand-dark text-xl">฿{s.price}</p>
+                              </div>
+                              <p className="font-body text-brand-dark/60 text-xs mt-0.5">{s.desc}</p>
+                            </div>
+                          </motion.button>
+                        )
+                      })}
                     </div>
                   </StepCard>
                 )}
@@ -624,9 +671,13 @@ function CustomizePageInner() {
                 <ChevronLeft size={18} /> ย้อนกลับ
               </button>
               {canGoNext && (
-                <button onClick={() => setStep(s => s + 1)} className="btn-primary flex-1">
+                <motion.button
+                  whileTap={{ scale: 0.97 }}
+                  onClick={() => setStep(s => s + 1)}
+                  className="btn-primary flex-1 text-base"
+                >
                   ถัดไป <ChevronRight size={18} />
-                </button>
+                </motion.button>
               )}
             </div>
 
@@ -683,8 +734,13 @@ export default function CustomizePage() {
 function StepCard({ title, desc, children }: { title: string; desc: string; children: React.ReactNode }) {
   return (
     <div className="card p-6 md:p-8">
-      <h2 className="font-display font-black text-2xl text-brand-dark">{title}</h2>
-      <p className="font-body text-brand-muted text-sm mt-1 mb-6">{desc}</p>
+      <div className="mb-6">
+        <h2 className="font-display font-black text-2xl text-brand-dark">{title}</h2>
+        <div className="flex items-center gap-2 mt-1">
+          <div className="h-px flex-1 bg-gradient-to-r from-brand-yellow to-transparent" />
+          <p className="font-body text-brand-muted text-sm">{desc}</p>
+        </div>
+      </div>
       {children}
     </div>
   )
@@ -698,17 +754,24 @@ function RadioCard({ selected, onClick, children, compact = false }: {
 }) {
   return (
     <motion.button
-      whileTap={{ scale: 0.96 }}
+      whileTap={{ scale: 0.95 }}
       onClick={onClick}
       className={`
-        w-full rounded-lg border-3 transition-all duration-100 text-center focus-ring
+        w-full rounded-xl border-3 transition-all duration-100 text-center focus-ring relative overflow-hidden
         ${compact ? 'p-3' : 'p-5'}
         ${selected
-          ? 'border-brand-dark bg-brand-yellow shadow-brick-sm translate-x-[2px] translate-y-[2px]'
-          : 'border-brand-dark bg-white shadow-brick hover:bg-brand-yellow/30 hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-brick-sm'
+          ? 'border-brand-dark bg-brand-yellow shadow-brick translate-x-[2px] translate-y-[2px]'
+          : 'border-brand-dark/50 bg-white shadow-brick-sm hover:border-brand-dark hover:bg-brand-yellow/20 hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-brick'
         }
       `}
     >
+      {selected && (
+        <span className="absolute top-1.5 right-1.5 w-4 h-4 bg-brand-dark rounded-full flex items-center justify-center">
+          <svg width="8" height="6" viewBox="0 0 8 6" fill="none">
+            <path d="M1 3L3 5L7 1" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </span>
+      )}
       {children}
     </motion.button>
   )

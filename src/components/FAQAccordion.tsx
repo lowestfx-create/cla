@@ -1,7 +1,7 @@
 'use client'
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ChevronDown } from 'lucide-react'
+import { Plus, Minus } from 'lucide-react'
 import { FAQItem } from '@/types'
 import { cn } from '@/lib/utils'
 
@@ -24,23 +24,22 @@ export default function FAQAccordion({ items, lang = 'th' }: FAQAccordionProps) 
           <div
             key={i}
             className={cn(
-              'bg-white rounded-2xl overflow-hidden border-2 transition-colors duration-200',
-              isOpen ? 'border-brand-yellow' : 'border-transparent shadow-card'
+              'rounded-lg border-3 border-brand-dark overflow-hidden transition-all duration-100',
+              isOpen ? 'bg-brand-yellow shadow-brick' : 'bg-white shadow-brick-sm'
             )}
           >
             <button
               onClick={() => setOpenIndex(isOpen ? null : i)}
-              className="w-full flex items-center justify-between p-5 text-left focus-ring rounded-2xl"
+              className="w-full flex items-center justify-between p-5 text-left focus-ring rounded-t-lg"
               aria-expanded={isOpen}
             >
-              <span className="font-display font-bold text-brand-dark pr-4">{question}</span>
-              <motion.div
-                animate={{ rotate: isOpen ? 180 : 0 }}
-                transition={{ duration: 0.2 }}
-                className="flex-shrink-0"
-              >
-                <ChevronDown size={20} className={cn('transition-colors', isOpen ? 'text-brand-yellow' : 'text-brand-muted')} />
-              </motion.div>
+              <span className="font-display font-black text-brand-dark pr-4">{question}</span>
+              <div className={cn(
+                'flex-shrink-0 w-8 h-8 rounded-md border-2 border-brand-dark flex items-center justify-center transition-all duration-100',
+                isOpen ? 'bg-brand-dark text-brand-yellow' : 'bg-white text-brand-dark'
+              )}>
+                {isOpen ? <Minus size={16} /> : <Plus size={16} />}
+              </div>
             </button>
 
             <AnimatePresence initial={false}>
@@ -49,9 +48,10 @@ export default function FAQAccordion({ items, lang = 'th' }: FAQAccordionProps) 
                   initial={{ height: 0, opacity: 0 }}
                   animate={{ height: 'auto', opacity: 1 }}
                   exit={{ height: 0, opacity: 0 }}
-                  transition={{ duration: 0.25, ease: 'easeInOut' }}
+                  transition={{ duration: 0.2, ease: 'easeInOut' }}
                 >
-                  <p className="font-body text-brand-muted leading-relaxed px-5 pb-5">
+                  <div className="border-t-2 border-brand-dark/30 mx-5" />
+                  <p className="font-body text-brand-dark/80 leading-relaxed px-5 py-4 text-sm">
                     {answer}
                   </p>
                 </motion.div>

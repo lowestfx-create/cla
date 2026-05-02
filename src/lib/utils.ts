@@ -19,9 +19,8 @@ export function formatPhoneNumber(phone: string): string {
 }
 
 export const STYLE_PRICES: Record<string, number> = {
-  classic: 590,
-  chibi: 650,
-  realistic: 790,
+  mini: 590,
+  normal: 650,
 }
 
 export const BASE_PRICES: Record<string, number> = {
@@ -33,7 +32,7 @@ export const BASE_PRICES: Record<string, number> = {
 export const ACCESSORY_PRICE = 50
 
 export function calculatePrice(config: Partial<CustomConfig>): number {
-  const base = STYLE_PRICES[config.style || 'classic'] ?? 590
+  const base = STYLE_PRICES[config.style || 'mini'] ?? 590
   const baseExtra = BASE_PRICES[config.base || 'none'] ?? 0
   const accessories = (config.accessories?.length ?? 0) * ACCESSORY_PRICE
   return base + baseExtra + accessories

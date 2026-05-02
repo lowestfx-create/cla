@@ -25,7 +25,7 @@ export interface CartItem {
 }
 
 export interface CustomConfig {
-  style: 'classic' | 'chibi' | 'realistic'
+  style: 'mini' | 'normal'
   skin: string
   faceExpression: string
   hairStyle: string

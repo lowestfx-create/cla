@@ -6,14 +6,14 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
-    --brand-yellow: #FFC800;
-    --brand-red: #E3000B;
+    --brand-yellow: #FFD700;
+    --brand-red: #DA291C;
+    --brand-blue: #006CB7;
+    --brand-dark: #1A1A1A;
   }
 
   * {
-    @apply border-gray-200;
+    box-sizing: border-box;
   }
 
   body {
@@ -26,28 +26,70 @@
 }
 
 @layer components {
+
+  /* ─── LEGO Buttons ─── */
   .btn-primary {
-    @apply inline-flex items-center justify-center gap-2 px-6 py-3 bg-brand-yellow text-brand-dark font-display font-bold rounded-xl hover:bg-yellow-400 active:scale-95 transition-all duration-200 shadow-pill;
+    @apply inline-flex items-center justify-center gap-2 px-6 py-3
+           bg-brand-yellow text-brand-dark font-display font-black
+           rounded-lg border-3 border-brand-dark
+           shadow-brick
+           hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-brick-sm
+           active:translate-x-[4px] active:translate-y-[4px] active:shadow-none
+           transition-all duration-75 select-none;
   }
 
   .btn-secondary {
-    @apply inline-flex items-center justify-center gap-2 px-6 py-3 bg-white text-brand-dark font-display font-semibold rounded-xl border-2 border-brand-dark hover:bg-brand-neutral active:scale-95 transition-all duration-200;
+    @apply inline-flex items-center justify-center gap-2 px-6 py-3
+           bg-white text-brand-dark font-display font-black
+           rounded-lg border-3 border-brand-dark
+           shadow-brick
+           hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-brick-sm
+           active:translate-x-[4px] active:translate-y-[4px] active:shadow-none
+           transition-all duration-75 select-none;
   }
 
   .btn-outline {
-    @apply inline-flex items-center justify-center gap-2 px-6 py-3 bg-transparent text-brand-dark font-display font-semibold rounded-xl border-2 border-gray-200 hover:border-brand-yellow hover:bg-brand-light active:scale-95 transition-all duration-200;
+    @apply inline-flex items-center justify-center gap-2 px-6 py-3
+           bg-brand-light text-brand-dark font-display font-bold
+           rounded-lg border-2 border-brand-dark
+           hover:bg-brand-yellow hover:shadow-brick-sm
+           active:translate-x-[2px] active:translate-y-[2px]
+           transition-all duration-75 select-none;
   }
 
+  .btn-dark {
+    @apply inline-flex items-center justify-center gap-2 px-6 py-3
+           bg-brand-dark text-white font-display font-black
+           rounded-lg border-3 border-brand-dark
+           shadow-brick-yellow
+           hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_#FFD700]
+           active:translate-x-[4px] active:translate-y-[4px] active:shadow-none
+           transition-all duration-75 select-none;
+  }
+
+  /* ─── LEGO Cards ─── */
   .card {
-    @apply bg-white rounded-2xl shadow-card hover:shadow-card-hover transition-all duration-300;
+    @apply bg-white rounded-lg border-3 border-brand-dark shadow-brick
+           transition-all duration-100;
   }
 
+  .card-hover {
+    @apply hover:-translate-x-[1px] hover:-translate-y-[1px] hover:shadow-card-hover;
+  }
+
+  /* ─── Typography ─── */
   .section-title {
-    @apply font-display font-bold text-3xl md:text-4xl text-brand-dark leading-tight;
+    @apply font-display font-black text-3xl md:text-4xl text-brand-dark leading-tight;
   }
 
   .section-subtitle {
     @apply font-body text-brand-muted text-lg mt-3;
+  }
+
+  .section-label {
+    @apply inline-flex items-center gap-2 px-3 py-1 rounded-md border-2 border-brand-dark
+           bg-brand-yellow text-brand-dark font-display font-black text-xs uppercase tracking-widest
+           shadow-brick-sm mb-4;
   }
 
   .container-site {
@@ -57,26 +99,62 @@
   .focus-ring {
     @apply focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-yellow focus-visible:ring-offset-2;
   }
+
+  /* ─── Stud Patterns ─── */
+  .stud-pattern {
+    background-image: radial-gradient(circle, rgba(0,0,0,0.18) 33%, transparent 33%);
+    background-size: 22px 22px;
+  }
+
+  .stud-pattern-light {
+    background-image: radial-gradient(circle, rgba(255,255,255,0.25) 33%, transparent 33%);
+    background-size: 22px 22px;
+  }
+
+  .stud-pattern-white {
+    background-image: radial-gradient(circle, rgba(255,255,255,0.12) 33%, transparent 33%);
+    background-size: 22px 22px;
+  }
+
+  /* ─── Brick Row Dividers ─── */
+  .brick-row {
+    height: 14px;
+    background: repeating-linear-gradient(
+      90deg,
+      #1A1A1A 0px, #1A1A1A 58px,
+      #2e2e2e 58px, #2e2e2e 62px
+    );
+  }
+
+  .brick-row-yellow {
+    height: 14px;
+    background: repeating-linear-gradient(
+      90deg,
+      #FFD700 0px, #FFD700 58px,
+      #E6C200 58px, #E6C200 62px
+    );
+  }
+
+  .brick-row-red {
+    height: 14px;
+    background: repeating-linear-gradient(
+      90deg,
+      #DA291C 0px, #DA291C 58px,
+      #c02418 58px, #c02418 62px
+    );
+  }
 }
 
-/* Custom scrollbar */
-::-webkit-scrollbar {
-  width: 6px;
-}
-::-webkit-scrollbar-track {
-  background: #f1f1f1;
-}
+/* ─── Scrollbar ─── */
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: #F5EFE0; }
 ::-webkit-scrollbar-thumb {
-  background: #FFC800;
-  border-radius: 3px;
+  background: #FFD700;
+  border: 2px solid #1A1A1A;
 }
 
-/* Smooth scroll */
-html {
-  scroll-behavior: smooth;
-}
+html { scroll-behavior: smooth; }
 
-/* Mobile bottom bar padding */
 @media (max-width: 768px) {
   .pb-safe {
     padding-bottom: calc(env(safe-area-inset-bottom) + 4rem);

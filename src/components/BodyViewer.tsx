@@ -9,12 +9,10 @@ function STLModel({ url, color, autoRotate }: { url: string; color: string; auto
   const geometry = useLoader(STLLoader, url)
   const groupRef = useRef<THREE.Group>(null)
 
-  // Compute center offset and scale WITHOUT mutating the geometry
   const { scale, centerOffset } = useMemo(() => {
     geometry.computeVertexNormals()
-    const box = new THREE.Box3().setFromBufferAttribute(
-      geometry.attributes.position as THREE.BufferAttribute
-    )
+    geometry.computeBoundingBox()
+    const box = geometry.boundingBox!
     const center = new THREE.Vector3()
     box.getCenter(center)
     const size = new THREE.Vector3()
@@ -28,15 +26,20 @@ function STLModel({ url, color, autoRotate }: { url: string; color: string; auto
 
   useFrame((state) => {
     if (autoRotate && groupRef.current) {
-      groupRef.current.rotation.y = state.clock.elapsedTime * 0.4
+      groupRef.current.rotation.y = state.clock.elapsedTime * 0.5
     }
   })
 
   return (
     <group ref={groupRef} scale={scale}>
-      <mesh position={centerOffset} castShadow>
+      <mesh position={centerOffset} castShadow receiveShadow>
         <primitive object={geometry} attach="geometry" />
-        <meshStandardMaterial color={color} roughness={0.5} metalness={0.05} />
+        <meshStandardMaterial
+          color={color}
+          roughness={0.4}
+          metalness={0.08}
+          envMapIntensity={0.6}
+        />
       </mesh>
     </group>
   )
@@ -45,7 +48,7 @@ function STLModel({ url, color, autoRotate }: { url: string; color: string; auto
 function LoadingSpinner() {
   return (
     <mesh>
-      <boxGeometry args={[0.5, 0.5, 0.5]} />
+      <boxGeometry args={[0.4, 0.4, 0.4]} />
       <meshStandardMaterial color="#FFD700" />
     </mesh>
   )
@@ -64,10 +67,26 @@ export default function BodyViewer({ url, color = '#DA291C', className = '', int
       className={`w-full h-full ${className}`}
       style={{ width: '100%', height: '100%', display: 'block', pointerEvents: interactive ? 'auto' : 'none' }}
     >
-      <Canvas camera={{ position: [0, 0, 5], fov: 45 }} dpr={[1, 2]} shadows={{ type: THREE.PCFShadowMap }} style={{ width: '100%', height: '100%' }}>
-        <ambientLight intensity={0.8} />
-        <directionalLight position={[5, 10, 5]} intensity={1.5} castShadow />
-        <directionalLight position={[-3, 3, -3]} intensity={0.3} color="#FFD700" />
+      <Canvas
+        key={url}
+        camera={{ position: [0, 0.6, 4.8], fov: 42 }}
+        dpr={[1, 2]}
+        shadows={{ type: THREE.PCFSoftShadowMap }}
+        gl={{ alpha: true, antialias: true }}
+        style={{ width: '100%', height: '100%', background: 'transparent' }}
+      >
+        {/* 3-point lighting setup */}
+        <ambientLight intensity={0.9} />
+        <directionalLight
+          position={[4, 8, 5]}
+          intensity={2.2}
+          castShadow
+          shadow-mapSize={[1024, 1024]}
+          shadow-camera-near={0.5}
+          shadow-camera-far={50}
+        />
+        <directionalLight position={[-5, 4, 2]} intensity={0.6} color="#FFF3CC" />
+        <directionalLight position={[1, -3, -4]} intensity={0.25} color="#C8DDFF" />
 
         <Suspense fallback={<LoadingSpinner />}>
           <STLModel url={url} color={color} autoRotate={!interactive} />

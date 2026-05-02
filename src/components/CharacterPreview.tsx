@@ -16,7 +16,6 @@ interface Props {
   config: Partial<CustomConfig>
 }
 
-// Head SVG constants (viewBox "0 0 120 100")
 const hx = 34
 const hw = 52
 const hTop = 12
@@ -81,26 +80,69 @@ export default function CharacterPreview({ config }: Props) {
     wink:    `M ${eyeL-1} ${eyeY+16} Q 60 ${eyeY+24} ${eyeR+1} ${eyeY+16}`,
   }
 
-  return (
-    <div className="bg-white rounded-2xl border-3 border-brand-dark shadow-brick overflow-hidden">
-      <div className="bg-gradient-to-b from-brand-light to-white flex flex-col items-center">
-        <p className="font-body text-brand-muted text-[10px] pt-3 mb-1 uppercase tracking-widest">PREVIEW</p>
+  const isNormal = style === 'normal'
 
-        {/* ── 3D Body ── */}
-        <div className="w-full h-52 bg-brand-neutral/40 overflow-hidden" style={{ height: '208px' }}>
-          <Suspense fallback={
-            <div className="w-full h-full flex items-center justify-center">
-              <div className="w-7 h-7 border-4 border-brand-dark border-t-transparent rounded-full animate-spin" />
-            </div>
-          }>
-            <BodyViewer url={stlUrl} color={topColor} className="w-full h-full" interactive={false} />
-          </Suspense>
+  return (
+    <div className="rounded-2xl border-3 border-brand-dark shadow-brick-lg overflow-hidden bg-white">
+      {/* ── 3D Body ── */}
+      <div
+        className="w-full relative overflow-hidden"
+        style={{
+          height: '220px',
+          background: 'linear-gradient(150deg, #0f172a 0%, #1e293b 45%, #0f3460 100%)',
+        }}
+      >
+        {/* Stud grid overlay */}
+        <div
+          className="absolute inset-0 opacity-10"
+          style={{
+            backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.6) 25%, transparent 25%)',
+            backgroundSize: '18px 18px',
+          }}
+        />
+
+        {/* PREVIEW label */}
+        <p className="absolute top-2.5 left-0 right-0 text-center font-body text-white/40 text-[9px] uppercase tracking-[0.25em] z-10 select-none">
+          PREVIEW
+        </p>
+
+        {/* Style badge top-right */}
+        <div className="absolute top-2 right-2 z-10">
+          <span className={`
+            px-2 py-0.5 text-[9px] font-display font-black rounded-md border-2 border-white/20
+            ${isNormal ? 'bg-brand-yellow/90 text-brand-dark' : 'bg-brand-red/90 text-white'}
+          `}>
+            {isNormal ? 'NORMAL' : 'MINI'}
+          </span>
         </div>
 
-        {/* ── Face + swatches strip ── */}
-        <div className="w-full px-3 py-2 bg-white border-t-2 border-brand-dark/10 flex items-center gap-3">
-          {/* mini face SVG */}
-          <svg viewBox="28 0 64 68" width="46" height="46" role="img" aria-label="หน้า">
+        {/* 3D viewer — key forces remount when style changes (bug fix) */}
+        <Suspense fallback={
+          <div className="w-full h-full flex items-center justify-center">
+            <div className="w-8 h-8 border-4 border-brand-yellow border-t-transparent rounded-full animate-spin" />
+          </div>
+        }>
+          <BodyViewer
+            key={stlUrl}
+            url={stlUrl}
+            color={topColor}
+            className="w-full h-full"
+            interactive={false}
+          />
+        </Suspense>
+
+        {/* Bottom fade */}
+        <div
+          className="absolute bottom-0 left-0 right-0 h-8 pointer-events-none"
+          style={{ background: 'linear-gradient(to top, rgba(255,255,255,0.08), transparent)' }}
+        />
+      </div>
+
+      {/* ── Face + color swatches ── */}
+      <div className="flex items-center gap-3 px-3 py-2.5 bg-brand-light border-t-3 border-brand-dark/10">
+        {/* Mini face SVG */}
+        <div className="flex-shrink-0 w-12 h-12 rounded-lg border-2 border-brand-dark/15 bg-white shadow-brick-sm overflow-hidden flex items-center justify-center">
+          <svg viewBox="28 0 64 68" width="44" height="44" role="img" aria-label="หน้า">
             <rect x={hx} y={hTop} width={hw} height={hBot - hTop} rx="10" fill={skin} />
             <ellipse cx={hx}    cy={hTop+21} rx="5" ry="7" fill={skin} />
             <ellipse cx={hx+hw} cy={hTop+21} rx="5" ry="7" fill={skin} />
@@ -117,53 +159,59 @@ export default function CharacterPreview({ config }: Props) {
             <path d={mouths[faceExpression] ?? mouths.smile} fill="none" stroke="#C97060" strokeWidth="2.2" strokeLinecap="round" />
             <HairLayer hairStyle={hairStyle ?? 'short-straight'} hairColor={hairColor ?? '#2C1810'} />
           </svg>
+        </div>
 
-          {/* color swatches */}
-          <div className="flex flex-col gap-1 flex-1 min-w-0">
-            <div className="flex items-center gap-1.5">
-              <div className="w-3 h-3 rounded-full border border-brand-dark/20 flex-shrink-0" style={{ background: topColor }} />
+        {/* Color swatches */}
+        <div className="flex flex-col gap-1.5 flex-1 min-w-0">
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1">
+              <div className="w-4 h-4 rounded-full border-2 border-brand-dark/30 shadow-sm" style={{ background: topColor }} />
               <span className="font-body text-[10px] text-brand-muted">เสื้อ</span>
-              <div className="w-3 h-3 rounded-full border border-brand-dark/20 flex-shrink-0 ml-1" style={{ background: bottomColor }} />
+            </div>
+            <div className="flex items-center gap-1">
+              <div className="w-4 h-4 rounded-full border-2 border-brand-dark/30 shadow-sm" style={{ background: bottomColor }} />
               <span className="font-body text-[10px] text-brand-muted">กางเกง</span>
             </div>
-            <div className="flex items-center gap-1.5">
-              <div className="w-3 h-3 rounded-full border border-brand-dark/20 flex-shrink-0" style={{ background: hairColor }} />
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1">
+              <div className="w-4 h-4 rounded-full border-2 border-brand-dark/30 shadow-sm" style={{ background: hairColor }} />
               <span className="font-body text-[10px] text-brand-muted">ผม</span>
-              <div className="w-3 h-3 rounded-full border border-brand-dark/20 flex-shrink-0 ml-1" style={{ background: shoesColor }} />
+            </div>
+            <div className="flex items-center gap-1">
+              <div className="w-4 h-4 rounded-full border-2 border-brand-dark/30 shadow-sm" style={{ background: shoesColor }} />
               <span className="font-body text-[10px] text-brand-muted">รองเท้า</span>
             </div>
           </div>
         </div>
+      </div>
 
-        {/* ── Skin tone picker ── */}
-        <div className="w-full px-3 pb-3 border-t-2 border-brand-dark/10 pt-2.5">
-          <p className="font-body text-[10px] text-brand-muted mb-2 uppercase tracking-widest">สีผิว</p>
-          <div className="flex gap-2">
-            {SKIN_TONES.map((tone) => (
-              <button
-                key={tone}
-                onClick={() => updateConfig({ skin: tone })}
-                aria-label={`สีผิว ${tone}`}
-                className="relative flex-1 h-7 rounded-full transition-all duration-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-dark"
-                style={{ background: tone, border: skin === tone ? '2.5px solid #1A1A1A' : '2px solid transparent' }}
-              >
-                {skin === tone && (
-                  <span className="absolute inset-0 flex items-center justify-center">
-                    <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
-                      <path d="M1 4L3.5 6.5L9 1" stroke={tone < '#C00000' ? '#fff' : '#1A1A1A'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                  </span>
-                )}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* ── Badge ── */}
-        <div className="pb-3">
-          <span className="px-3 py-1 bg-brand-yellow text-brand-dark text-xs font-display font-black rounded-full border-2 border-brand-dark shadow-brick-sm">
-            {style === 'mini' ? 'Mini Body' : 'Normal Body'}
-          </span>
+      {/* ── Skin tone picker ── */}
+      <div className="px-3 pb-3 pt-2 bg-white border-t border-brand-dark/8">
+        <p className="font-body text-[9px] text-brand-muted mb-2 uppercase tracking-widest">สีผิว</p>
+        <div className="flex gap-1.5">
+          {SKIN_TONES.map((tone) => (
+            <button
+              key={tone}
+              onClick={() => updateConfig({ skin: tone })}
+              aria-label={`สีผิว ${tone}`}
+              className="relative flex-1 h-7 rounded-full transition-all duration-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-dark"
+              style={{
+                background: tone,
+                border: skin === tone ? '3px solid #1A1A1A' : '2px solid rgba(0,0,0,0.12)',
+                boxShadow: skin === tone ? '2px 2px 0 #1A1A1A' : 'none',
+                transform: skin === tone ? 'translateY(-1px)' : 'none',
+              }}
+            >
+              {skin === tone && (
+                <span className="absolute inset-0 flex items-center justify-center">
+                  <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
+                    <path d="M1 4L3.5 6.5L9 1" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </span>
+              )}
+            </button>
+          ))}
         </div>
       </div>
     </div>

@@ -34,119 +34,121 @@ export default function Header() {
     <>
       <header
         className={cn(
-          'fixed top-0 left-0 right-0 z-50 transition-all duration-300',
-          scrolled ? 'bg-white/95 backdrop-blur-md shadow-sm' : 'bg-transparent'
+          'fixed top-0 left-0 right-0 z-50 transition-all duration-200',
+          scrolled
+            ? 'bg-white border-b-3 border-brand-dark shadow-[0_3px_0_#FFD700]'
+            : 'bg-transparent'
         )}
       >
         <div className="container-site">
           <div className="flex items-center justify-between h-16">
+
             {/* Logo */}
-            <Link href="/" className="flex items-center gap-2 focus-ring rounded-lg">
-              <div className="w-8 h-8 bg-brand-yellow rounded-lg flex items-center justify-center">
-                <span className="text-brand-dark font-display font-black text-sm">B</span>
+            <Link href="/" className="flex items-center gap-2.5 focus-ring rounded-lg">
+              <div className="w-9 h-9 bg-brand-yellow border-3 border-brand-dark shadow-[2px_2px_0_#1A1A1A] rounded-lg flex items-center justify-center">
+                <span className="text-brand-dark font-display font-black text-sm leading-none">B</span>
               </div>
-              <span className="font-display font-black text-xl text-brand-dark">
-                Brick<span className="text-brand-yellow">Me</span>
+              <span className="font-display font-black text-xl text-brand-dark leading-none">
+                Brick<span className="text-brand-red">Me</span>
               </span>
             </Link>
 
             {/* Desktop Nav */}
-            <nav className="hidden md:flex items-center gap-6">
+            <nav className="hidden md:flex items-center gap-1">
               {navLinks.map((link) => (
                 <Link
                   key={link.href + link.labelTH}
                   href={link.href}
                   className={cn(
-                    'font-body font-medium text-sm transition-colors duration-200 relative group focus-ring rounded',
-                    isActive(link.href) ? 'text-brand-dark' : 'text-brand-muted hover:text-brand-dark'
+                    'font-display font-bold text-sm px-3 py-1.5 rounded-lg transition-all duration-100 focus-ring',
+                    isActive(link.href)
+                      ? 'bg-brand-yellow text-brand-dark border-2 border-brand-dark shadow-[2px_2px_0_#1A1A1A]'
+                      : 'text-brand-dark hover:bg-brand-yellow/40 border-2 border-transparent hover:border-brand-dark'
                   )}
                 >
                   {language === 'th' ? link.labelTH : link.labelEN}
-                  <span
-                    className={cn(
-                      'absolute -bottom-1 left-0 h-0.5 bg-brand-yellow transition-all duration-200',
-                      isActive(link.href) ? 'w-full' : 'w-0 group-hover:w-full'
-                    )}
-                  />
                 </Link>
               ))}
             </nav>
 
-            {/* Right actions */}
+            {/* Right Actions */}
             <div className="flex items-center gap-2">
-              {/* Language Toggle */}
               <button
                 onClick={() => setLanguage(language === 'th' ? 'en' : 'th')}
-                className="hidden md:flex items-center gap-1 px-3 py-1.5 rounded-lg border border-gray-200 text-xs font-display font-bold hover:border-brand-yellow hover:bg-brand-light transition-all duration-200 focus-ring"
+                className="hidden md:flex items-center px-3 py-1.5 rounded-lg border-2 border-brand-dark bg-white text-xs font-display font-black shadow-[2px_2px_0_#1A1A1A] hover:bg-brand-yellow hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[1px_1px_0_#1A1A1A] transition-all duration-75 focus-ring"
                 aria-label="Toggle language"
               >
-                {language === 'th' ? '🇹🇭 TH' : '🇬🇧 EN'}
+                {language === 'th' ? 'TH' : 'EN'}
               </button>
 
-              {/* LINE Button */}
               <a
                 href="https://line.me/ti/p/~@brickme"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#06C755] text-white text-xs font-display font-bold hover:bg-[#05b34c] transition-all duration-200 focus-ring"
+                className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#06C755] border-2 border-brand-dark text-white text-xs font-display font-black shadow-[2px_2px_0_#1A1A1A] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[1px_1px_0_#1A1A1A] transition-all duration-75 focus-ring"
                 aria-label="Contact via LINE"
               >
-                <MessageCircle size={14} />
+                <MessageCircle size={13} />
                 LINE
               </a>
 
-              {/* Cart */}
               <Link
                 href="/cart"
-                className="relative p-2 rounded-xl hover:bg-brand-light transition-colors duration-200 focus-ring"
+                className="relative p-2 rounded-lg border-2 border-brand-dark bg-white shadow-[2px_2px_0_#1A1A1A] hover:bg-brand-yellow hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[1px_1px_0_#1A1A1A] transition-all duration-75 focus-ring"
                 aria-label={`ตะกร้าสินค้า ${totalItems} ชิ้น`}
               >
-                <ShoppingCart size={22} className="text-brand-dark" />
+                <ShoppingCart size={20} className="text-brand-dark" />
                 {totalItems > 0 && (
                   <motion.span
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
-                    className="absolute -top-0.5 -right-0.5 w-5 h-5 bg-brand-red text-white text-xs font-bold rounded-full flex items-center justify-center"
+                    className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-brand-red border-2 border-brand-dark text-white text-[9px] font-black rounded-full flex items-center justify-center"
                   >
                     {totalItems > 9 ? '9+' : totalItems}
                   </motion.span>
                 )}
               </Link>
 
-              {/* Hamburger */}
               <button
                 onClick={() => setMenuOpen(!menuOpen)}
-                className="md:hidden p-2 rounded-xl hover:bg-brand-light transition-colors duration-200 focus-ring"
+                className="md:hidden p-2 rounded-lg border-2 border-brand-dark bg-white shadow-[2px_2px_0_#1A1A1A] hover:bg-brand-yellow transition-all duration-75 focus-ring"
                 aria-label="เปิดเมนู"
               >
-                {menuOpen ? <X size={22} /> : <Menu size={22} />}
+                {menuOpen ? <X size={20} /> : <Menu size={20} />}
               </button>
             </div>
           </div>
         </div>
+
+        {/* Yellow stud strip below header when scrolled */}
+        {scrolled && <div className="brick-row-yellow" />}
       </header>
 
       {/* Mobile Menu */}
       <AnimatePresence>
         {menuOpen && (
           <motion.div
-            initial={{ opacity: 0, y: -20 }}
+            initial={{ opacity: 0, y: -12 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.2 }}
-            className="fixed inset-0 z-40 bg-white pt-16"
+            exit={{ opacity: 0, y: -12 }}
+            transition={{ duration: 0.15 }}
+            className="fixed inset-0 z-40 bg-brand-neutral pt-16"
           >
-            <div className="container-site py-8 flex flex-col gap-4">
-              {navLinks.map((link) => (
+            <div className="brick-row-yellow" />
+            <div className="container-site py-8 flex flex-col gap-3">
+              {navLinks.map((link, i) => (
                 <Link
                   key={link.href + link.labelTH + 'mobile'}
                   href={link.href}
                   onClick={() => setMenuOpen(false)}
                   className={cn(
-                    'font-display font-bold text-2xl py-3 border-b border-gray-100 transition-colors duration-200',
-                    isActive(link.href) ? 'text-brand-dark' : 'text-brand-muted'
+                    'font-display font-black text-2xl py-3.5 px-5 rounded-lg border-3 border-brand-dark transition-all duration-75',
+                    isActive(link.href)
+                      ? 'bg-brand-yellow shadow-brick'
+                      : 'bg-white shadow-brick-sm hover:bg-brand-yellow/50'
                   )}
                 >
+                  <span className="text-brand-muted text-base mr-3 font-display">0{i + 1}</span>
                   {language === 'th' ? link.labelTH : link.labelEN}
                 </Link>
               ))}
@@ -154,15 +156,15 @@ export default function Header() {
               <div className="flex items-center gap-3 mt-4">
                 <button
                   onClick={() => setLanguage(language === 'th' ? 'en' : 'th')}
-                  className="flex-1 py-3 rounded-xl border-2 border-gray-200 font-display font-bold text-center hover:border-brand-yellow transition-colors duration-200"
+                  className="flex-1 py-3 rounded-lg border-3 border-brand-dark font-display font-black text-center bg-white shadow-brick-sm hover:bg-brand-yellow transition-all duration-75"
                 >
-                  {language === 'th' ? '🇬🇧 EN' : '🇹🇭 TH'}
+                  {language === 'th' ? 'EN' : 'TH'}
                 </button>
                 <a
                   href="https://line.me/ti/p/~@brickme"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex-1 py-3 rounded-xl bg-[#06C755] text-white font-display font-bold text-center flex items-center justify-center gap-2"
+                  className="flex-1 py-3 rounded-lg border-3 border-brand-dark bg-[#06C755] text-white font-display font-black text-center flex items-center justify-center gap-2 shadow-brick-sm"
                 >
                   <MessageCircle size={18} />
                   LINE

@@ -12,7 +12,7 @@ export default function AddToCartButton({ product }: { product: Product }) {
       id: `product-${product.id}-${Date.now()}`,
       productId: product.id,
       customConfig: {
-        style: 'classic', skin: '#FDBCB4', faceExpression: 'smile',
+        style: 'mini', skin: '#FDBCB4', faceExpression: 'smile',
         hairStyle: 'short-straight', hairColor: '#2C1810',
         top: 'tshirt', topColor: '#3B82F6',
         bottom: 'jeans', bottomColor: '#1E3A5F',
