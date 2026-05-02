@@ -299,7 +299,13 @@ function CustomizePageInner() {
           {/* ── Left: Preview ── */}
           <div className="lg:w-80 lg:flex-shrink-0">
             <div className="lg:sticky lg:top-36">
-              <CharacterPreview config={config} />
+              <CharacterPreview config={{
+                ...config,
+                // Only show face after user has visited face step (step >= 1)
+                faceExpression: step >= 1 ? config.faceExpression : '',
+                // Only show hair after hair step (step >= 2)
+                hairStyle: step >= 2 ? config.hairStyle : 'bald',
+              }} />
               <div className="mt-4">
                 <PricePill price={currentPrice} onAddToCart={step === STEPS.length - 1 ? handleAddToCart : undefined} />
               </div>
