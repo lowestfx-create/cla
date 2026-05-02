@@ -1,9 +1,20 @@
 'use client'
-import { Suspense, useMemo, useRef } from 'react'
+import { Suspense, useMemo, useRef, Component, ReactNode } from 'react'
 import { Canvas, useLoader, useFrame } from '@react-three/fiber'
 import { useGLTF, OrbitControls } from '@react-three/drei'
 import { STLLoader } from 'three/examples/jsm/loaders/STLLoader.js'
 import * as THREE from 'three'
+
+// Preload all baked face GLBs so switching is instant
+const FACE_GLBS = Array.from({ length: 7 }, (_, i) => `/parts/face/face${i + 1}_baked.glb`)
+FACE_GLBS.forEach((url) => useGLTF.preload(url))
+
+// ErrorBoundary — swallows GLB load errors silently (shows nothing instead of crashing)
+class FaceErrorBoundary extends Component<{ children: ReactNode }, { error: boolean }> {
+  state = { error: false }
+  static getDerivedStateFromError() { return { error: true } }
+  render() { return this.state.error ? null : this.props.children }
+}
 
 // ─── Gentle sway so back-of-head never shows ─────────────────────────────────
 function RotatingGroup({ autoRotate, children }: { autoRotate: boolean; children: React.ReactNode }) {
@@ -52,7 +63,8 @@ function FaceModel({ url, bodyTopY }: { url: string; bodyTopY: number }) {
   }, [scene, bodyTopY])
 
   return (
-    <group scale={faceScale} position={facePosition}>
+    // rotation-y = π flips the face to face the camera (GLB front faces +Z, camera looks from +Z → flip)
+    <group scale={faceScale} position={facePosition} rotation={[0, Math.PI, 0]}>
       <primitive object={faceClone} />
     </group>
   )
@@ -101,9 +113,11 @@ function CharacterGroup({
 
       {/* Face — sits on top of body using real bodyTopY */}
       {faceUrl && (
-        <Suspense key={faceUrl} fallback={null}>
-          <FaceModel url={faceUrl} bodyTopY={bodyTopY} />
-        </Suspense>
+        <FaceErrorBoundary key={faceUrl}>
+          <Suspense fallback={null}>
+            <FaceModel url={faceUrl} bodyTopY={bodyTopY} />
+          </Suspense>
+        </FaceErrorBoundary>
       )}
     </>
   )
