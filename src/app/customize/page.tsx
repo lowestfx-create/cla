@@ -18,6 +18,7 @@ import PricePill from '@/components/PricePill'
 import CharacterPreview from '@/components/CharacterPreview'
 
 const BodyViewer = dynamic(() => import('@/components/BodyViewer'), { ssr: false })
+const CharacterViewer = dynamic(() => import('@/components/CharacterViewer'), { ssr: false })
 
 const STEPS = ['สไตล์', 'หน้า', 'ผม', 'ชุด', 'อุปกรณ์', 'ฐาน', 'รูปอ้างอิง', 'สรุป']
 
@@ -27,13 +28,13 @@ const STYLES = [
 ]
 
 const FACES = [
-  { id: 'face1', label: 'น่ากลัว',     img: '/parts/face/face1_preview.png' },
-  { id: 'face2', label: 'โกรธ',        img: '/parts/face/face2_preview.png' },
-  { id: 'face3', label: 'ยิ้มซ่า',     img: '/parts/face/face3_preview.png' },
-  { id: 'face4', label: 'หน้ากาก',     img: '/parts/face/face4_preview.png' },
-  { id: 'face5', label: 'มั่นใจ',      img: '/parts/face/face5_preview.png' },
-  { id: 'face6', label: 'ไซบอร์ก',    img: '/parts/face/face6_preview.png' },
-  { id: 'face7', label: 'แว้บ',        img: '/parts/face/face7_preview.png' },
+  { id: 'face1', label: 'น่ากลัว',  img: '/parts/face/face1_preview.png', glb: '/parts/face/face1_baked.glb' },
+  { id: 'face2', label: 'โกรธ',     img: '/parts/face/face2_preview.png', glb: '/parts/face/face2_baked.glb' },
+  { id: 'face3', label: 'ยิ้มซ่า',  img: '/parts/face/face3_preview.png', glb: '/parts/face/face3_baked.glb' },
+  { id: 'face4', label: 'หน้ากาก',  img: '/parts/face/face4_preview.png', glb: '/parts/face/face4_baked.glb' },
+  { id: 'face5', label: 'มั่นใจ',   img: '/parts/face/face5_preview.png', glb: '/parts/face/face5_baked.glb' },
+  { id: 'face6', label: 'ไซบอร์ก', img: '/parts/face/face6_preview.png', glb: '/parts/face/face6_baked.glb' },
+  { id: 'face7', label: 'แว้บ',     img: '/parts/face/face7_preview.png', glb: '/parts/face/face7_baked.glb' },
 ]
 
 const HAIR_STYLES = [
@@ -363,9 +364,11 @@ function CustomizePageInner() {
                                   <div className="w-8 h-8 border-4 border-brand-yellow border-t-transparent rounded-full animate-spin" />
                                 </div>
                               }>
-                                <BodyViewer
-                                  url={s.stl}
-                                  color={isSelected ? '#DA291C' : '#4A90D9'}
+                                <CharacterViewer
+                                  bodyUrl={s.stl}
+                                  bodyColor={isSelected ? '#DA291C' : '#4A90D9'}
+                                  faceUrl={FACES.find(f => f.id === config.faceExpression)?.glb ?? null}
+                                  skinColor={config.skin ?? '#FDBCB4'}
                                   className="w-full h-full"
                                   interactive={false}
                                 />

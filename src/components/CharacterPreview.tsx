@@ -5,7 +5,18 @@ import { CustomConfig } from '@/types'
 import { useCustomizerStore } from '@/lib/store'
 import { SKIN_TONES } from '@/components/ColorPicker'
 
-const BodyViewer = dynamic(() => import('@/components/BodyViewer'), { ssr: false })
+const CharacterViewer = dynamic(() => import('@/components/CharacterViewer'), { ssr: false })
+
+// Map faceExpression id → baked GLB path
+const FACE_GLBS: Record<string, string> = {
+  face1: '/parts/face/face1_baked.glb',
+  face2: '/parts/face/face2_baked.glb',
+  face3: '/parts/face/face3_baked.glb',
+  face4: '/parts/face/face4_baked.glb',
+  face5: '/parts/face/face5_baked.glb',
+  face6: '/parts/face/face6_baked.glb',
+  face7: '/parts/face/face7_baked.glb',
+}
 
 const STYLE_STLS: Record<string, string> = {
   mini: '/models/mini-body.stl',
@@ -70,6 +81,7 @@ export default function CharacterPreview({ config }: Props) {
   } = config
 
   const stlUrl = STYLE_STLS[style ?? 'mini'] ?? STYLE_STLS.mini
+  const faceGlb = FACE_GLBS[faceExpression ?? ''] ?? null
 
   const mouths: Record<string, string> = {
     smile:   `M ${eyeL-1} ${eyeY+16} Q 60 ${eyeY+24} ${eyeR+1} ${eyeY+16}`,
@@ -116,16 +128,18 @@ export default function CharacterPreview({ config }: Props) {
           </span>
         </div>
 
-        {/* 3D viewer — key forces remount when style changes (bug fix) */}
+        {/* 3D viewer — body + face together */}
         <Suspense fallback={
           <div className="w-full h-full flex items-center justify-center">
             <div className="w-8 h-8 border-4 border-brand-yellow border-t-transparent rounded-full animate-spin" />
           </div>
         }>
-          <BodyViewer
+          <CharacterViewer
             key={stlUrl}
-            url={stlUrl}
-            color={topColor}
+            bodyUrl={stlUrl}
+            bodyColor={topColor}
+            faceUrl={faceGlb}
+            skinColor={skin}
             className="w-full h-full"
             interactive={false}
           />
