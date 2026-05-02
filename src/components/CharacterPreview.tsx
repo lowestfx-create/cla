@@ -135,7 +135,7 @@ export default function CharacterPreview({ config }: Props) {
           </div>
         }>
           <CharacterViewer
-            key={stlUrl}
+            key={`${stlUrl}|${faceGlb ?? 'none'}`}
             bodyUrl={stlUrl}
             bodyColor={topColor}
             faceUrl={faceGlb}

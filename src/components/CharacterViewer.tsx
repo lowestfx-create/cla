@@ -1,5 +1,5 @@
 'use client'
-import { Suspense, useMemo, useRef } from 'react'
+import { Suspense, useMemo, useRef, useState } from 'react'
 import { Canvas, useLoader, useFrame } from '@react-three/fiber'
 import { useGLTF, OrbitControls } from '@react-three/drei'
 import { STLLoader } from 'three/examples/jsm/loaders/STLLoader.js'
@@ -10,17 +10,18 @@ function RotatingGroup({ autoRotate, children }: { autoRotate: boolean; children
   const ref = useRef<THREE.Group>(null)
   useFrame((state) => {
     if (autoRotate && ref.current) {
-      ref.current.rotation.y = state.clock.elapsedTime * 0.45
+      // Gentle sway ±25° so back of head never shows
+      ref.current.rotation.y = Math.sin(state.clock.elapsedTime * 0.65) * 0.44
     }
   })
   return <group ref={ref}>{children}</group>
 }
 
 // ─── Body (STL) ──────────────────────────────────────────────────────────────
-function BodyModel({ url, color }: { url: string; color: string }) {
+function BodyModel({ url, color, onBodyTop }: { url: string; color: string; onBodyTop?: (y: number) => void }) {
   const geometry = useLoader(STLLoader, url)
 
-  const { scale, centerOffset } = useMemo(() => {
+  const { scale, centerOffset, bodyTopY } = useMemo(() => {
     geometry.computeVertexNormals()
     geometry.computeBoundingBox()
     const box = geometry.boundingBox!
@@ -29,11 +30,18 @@ function BodyModel({ url, color }: { url: string; color: string }) {
     const size = new THREE.Vector3()
     box.getSize(size)
     const maxDim = Math.max(size.x, size.y, size.z)
+    const s = maxDim > 0 ? 2.2 / maxDim : 1
+    // actual top of body in world units after centering
+    const topY = (box.max.y - center.y) * s
     return {
-      scale: maxDim > 0 ? 2.2 / maxDim : 1,
+      scale: s,
       centerOffset: [-center.x, -center.y, -center.z] as [number, number, number],
+      bodyTopY: topY,
     }
   }, [geometry])
+
+  // Report body top so FaceModel can sit on it correctly
+  if (onBodyTop) onBodyTop(bodyTopY)
 
   return (
     <group scale={scale}>
@@ -46,7 +54,7 @@ function BodyModel({ url, color }: { url: string; color: string }) {
 }
 
 // ─── Face (GLB with baked texture) ───────────────────────────────────────────
-function FaceModel({ url }: { url: string }) {
+function FaceModel({ url, bodyTopY }: { url: string; bodyTopY: number }) {
   const { scene } = useGLTF(url)
 
   const { faceClone, faceScale, facePosition } = useMemo(() => {
@@ -59,26 +67,23 @@ function FaceModel({ url }: { url: string }) {
     box.getSize(size)
     const maxDim = Math.max(size.x, size.y, size.z)
 
-    // Head ≈ 33% of body height (body = 2.2 units → head = 0.72)
-    const fScale = maxDim > 0 ? 0.72 / maxDim : 1
+    // Head ≈ 32% of body height
+    const fScale = maxDim > 0 ? 0.70 / maxDim : 1
 
-    // Bottom of face in local scaled coords
-    const faceBottomLocal = (box.min.y - center.y) * fScale
-
-    // Body top ≈ 1.1  (body scaled 2.2, centered at 0)
-    // Sit face bottom right on body top
-    const targetY = 1.1 - faceBottomLocal
+    // Place face bottom right on measured body top (slight overlap of 0.04 to hide the gap)
+    const faceBottomScaled = box.min.y * fScale
+    const posY = bodyTopY - faceBottomScaled - 0.04
 
     return {
       faceClone: clone,
       faceScale: fScale,
       facePosition: [
         -center.x * fScale,
-        targetY - center.y * fScale,
+        posY - center.y * fScale,
         -center.z * fScale,
       ] as [number, number, number],
     }
-  }, [scene])
+  }, [scene, bodyTopY])
 
   return (
     <group scale={faceScale} position={facePosition}>
@@ -117,6 +122,8 @@ export default function CharacterViewer({
   className = '',
   interactive = true,
 }: CharacterViewerProps) {
+  const [bodyTopY, setBodyTopY] = useState<number>(1.0)
+
   return (
     <div
       className={`w-full h-full ${className}`}
@@ -137,12 +144,12 @@ export default function CharacterViewer({
         {/* Single RotatingGroup → body + face always rotate in sync */}
         <RotatingGroup autoRotate={!interactive}>
           <Suspense fallback={<Spinner />}>
-            <BodyModel url={bodyUrl} color={bodyColor} />
+            <BodyModel url={bodyUrl} color={bodyColor} onBodyTop={setBodyTopY} />
           </Suspense>
 
           {faceUrl && (
-            <Suspense fallback={null}>
-              <FaceModel url={faceUrl} />
+            <Suspense key={faceUrl} fallback={null}>
+              <FaceModel url={faceUrl} bodyTopY={bodyTopY} />
             </Suspense>
           )}
         </RotatingGroup>
