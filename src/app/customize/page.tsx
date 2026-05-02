@@ -196,7 +196,7 @@ function CustomizePageInner() {
   const [step, setStep] = useState(0)
   const [note, setNote] = useState('')
   const [baseName, setBaseName] = useState('')
-  const faceThumbs = useFaceThumbnails(FACES.map((f) => f.glb))
+  const faceThumbs = useFaceThumbnails(FACES.map((f) => f.glb), config.skin ?? '#FDBCB4')
 
   useEffect(() => {
     const preset = searchParams.get('preset')

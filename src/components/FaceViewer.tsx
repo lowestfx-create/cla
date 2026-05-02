@@ -8,6 +8,7 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 
 async function renderFaceToDataURL(
   url: string,
+  skinColor: string,
   renderer: THREE.WebGLRenderer,
   camera: THREE.PerspectiveCamera,
   scene: THREE.Scene,
@@ -15,6 +16,19 @@ async function renderFaceToDataURL(
 ): Promise<string> {
   const gltf = await loader.loadAsync(url)
   const model = gltf.scene
+
+  // Apply skin color to every mesh in the model
+  const color = new THREE.Color(skinColor)
+  model.traverse((obj) => {
+    const mesh = obj as THREE.Mesh
+    if (mesh.isMesh) {
+      mesh.material = new THREE.MeshStandardMaterial({
+        color,
+        roughness: 0.4,
+        metalness: 0.0,
+      })
+    }
+  })
 
   // Auto-center + auto-scale
   const box = new THREE.Box3().setFromObject(model)
@@ -32,18 +46,24 @@ async function renderFaceToDataURL(
   const dataUrl = renderer.domElement.toDataURL('image/webp', 0.9)
   scene.remove(model)
   model.traverse((obj) => {
-    if ((obj as THREE.Mesh).geometry) (obj as THREE.Mesh).geometry.dispose()
+    const mesh = obj as THREE.Mesh
+    if (mesh.isMesh) {
+      if (Array.isArray(mesh.material)) mesh.material.forEach((m) => m.dispose())
+      else mesh.material.dispose()
+      mesh.geometry.dispose()
+    }
   })
 
   return dataUrl
 }
 
 // ─── Hook: generate all thumbnails with one shared renderer ─────────────────
-export function useFaceThumbnails(urls: string[]): (string | null)[] {
+export function useFaceThumbnails(urls: string[], skinColor: string): (string | null)[] {
   const [thumbs, setThumbs] = useState<(string | null)[]>(urls.map(() => null))
 
   useEffect(() => {
     let cancelled = false
+    setThumbs(urls.map(() => null)) // reset on skin color change
 
     const SIZE = 160
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true })
@@ -56,8 +76,8 @@ export function useFaceThumbnails(urls: string[]): (string | null)[] {
     camera.lookAt(0, 0, 0)
 
     const scene = new THREE.Scene()
-    const ambient = new THREE.AmbientLight(0xffffff, 1.4)
-    const dir1 = new THREE.DirectionalLight(0xffffff, 1.2)
+    const ambient = new THREE.AmbientLight(0xffffff, 1.2)
+    const dir1 = new THREE.DirectionalLight(0xffffff, 1.5)
     dir1.position.set(2, 4, 3)
     const dir2 = new THREE.DirectionalLight(0xffffff, 0.4)
     dir2.position.set(-2, 1, 2)
@@ -65,12 +85,12 @@ export function useFaceThumbnails(urls: string[]): (string | null)[] {
 
     const loader = new GLTFLoader()
 
-    // Render one at a time to avoid memory spikes
+    // Render one at a time (sequential to avoid memory spikes)
     ;(async () => {
       for (let i = 0; i < urls.length; i++) {
         if (cancelled) break
         try {
-          const dataUrl = await renderFaceToDataURL(urls[i], renderer, camera, scene, loader)
+          const dataUrl = await renderFaceToDataURL(urls[i], skinColor, renderer, camera, scene, loader)
           if (!cancelled) {
             setThumbs((prev) => {
               const next = [...prev]
@@ -79,7 +99,7 @@ export function useFaceThumbnails(urls: string[]): (string | null)[] {
             })
           }
         } catch (err) {
-          console.warn('FaceViewer: failed to load', urls[i], err)
+          console.warn('FaceViewer: failed to render', urls[i], err)
         }
       }
       if (!cancelled) renderer.dispose()
@@ -89,13 +109,14 @@ export function useFaceThumbnails(urls: string[]): (string | null)[] {
       cancelled = true
       renderer.dispose()
     }
+  // Re-render when skin color changes
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [urls.join(',')])
+  }, [urls.join(','), skinColor])
 
   return thumbs
 }
 
-// ─── FaceThumb: shows one generated thumbnail ────────────────────────────────
+// ─── FaceThumb: displays one generated thumbnail ─────────────────────────────
 interface FaceThumbProps {
   dataUrl: string | null
   className?: string
