@@ -31,17 +31,18 @@ function FaceModel({ url, bodyTopY }: { url: string; bodyTopY: number }) {
 
     const fScale = maxDim > 0 ? 0.70 / maxDim : 1
 
-    // bottom of face in world space = bodyTopY (with slight 0.04 overlap to hide gap)
-    const faceBottomWorld = box.min.y * fScale
-    const posY = bodyTopY - faceBottomWorld - 0.04
+    // world_y of vertex at local ly = facePosition.y + ly * fScale
+    // We want face bottom (ly = box.min.y) to sit at bodyTopY - 0.04
+    // => facePosition.y = bodyTopY - 0.04 - box.min.y * fScale
+    const facePositionY = bodyTopY - 0.04 - box.min.y * fScale
 
     return {
       faceClone: clone,
       faceScale: fScale,
       facePosition: [
-        -center.x * fScale,
-        posY - center.y * fScale,
-        -center.z * fScale,
+        -center.x * fScale,   // center face on X
+        facePositionY,         // correct Y: face bottom sits on body top
+        -center.z * fScale,   // center face on Z
       ] as [number, number, number],
     }
   }, [scene, bodyTopY])
