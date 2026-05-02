@@ -5,18 +5,20 @@ import { useGLTF, OrbitControls } from '@react-three/drei'
 import { STLLoader } from 'three/examples/jsm/loaders/STLLoader.js'
 import * as THREE from 'three'
 
+// ─── Rotating parent — body + face share ONE rotation so they always sync ────
+function RotatingGroup({ autoRotate, children }: { autoRotate: boolean; children: React.ReactNode }) {
+  const ref = useRef<THREE.Group>(null)
+  useFrame((state) => {
+    if (autoRotate && ref.current) {
+      ref.current.rotation.y = state.clock.elapsedTime * 0.45
+    }
+  })
+  return <group ref={ref}>{children}</group>
+}
+
 // ─── Body (STL) ──────────────────────────────────────────────────────────────
-function BodyModel({
-  url,
-  color,
-  autoRotate,
-}: {
-  url: string
-  color: string
-  autoRotate: boolean
-}) {
+function BodyModel({ url, color }: { url: string; color: string }) {
   const geometry = useLoader(STLLoader, url)
-  const groupRef = useRef<THREE.Group>(null)
 
   const { scale, centerOffset } = useMemo(() => {
     geometry.computeVertexNormals()
@@ -27,21 +29,14 @@ function BodyModel({
     const size = new THREE.Vector3()
     box.getSize(size)
     const maxDim = Math.max(size.x, size.y, size.z)
-    const s = maxDim > 0 ? 2.2 / maxDim : 1
     return {
-      scale: s,
+      scale: maxDim > 0 ? 2.2 / maxDim : 1,
       centerOffset: [-center.x, -center.y, -center.z] as [number, number, number],
     }
   }, [geometry])
 
-  useFrame((state) => {
-    if (autoRotate && groupRef.current) {
-      groupRef.current.rotation.y = state.clock.elapsedTime * 0.45
-    }
-  })
-
   return (
-    <group ref={groupRef} scale={scale}>
+    <group scale={scale}>
       <mesh position={centerOffset} castShadow receiveShadow>
         <primitive object={geometry} attach="geometry" />
         <meshStandardMaterial color={color} roughness={0.4} metalness={0.08} envMapIntensity={0.6} />
@@ -51,18 +46,10 @@ function BodyModel({
 }
 
 // ─── Face (GLB with baked texture) ───────────────────────────────────────────
-// Separate component so useGLTF is never called conditionally
-function FaceModel({
-  url,
-  autoRotate,
-}: {
-  url: string
-  autoRotate: boolean
-}) {
+function FaceModel({ url }: { url: string }) {
   const { scene } = useGLTF(url)
-  const groupRef = useRef<THREE.Group>(null)
 
-  const { faceClone, faceScale, faceOffset } = useMemo(() => {
+  const { faceClone, faceScale, facePosition } = useMemo(() => {
     const clone = scene.clone(true)
 
     const box = new THREE.Box3().setFromObject(clone)
@@ -72,32 +59,29 @@ function FaceModel({
     box.getSize(size)
     const maxDim = Math.max(size.x, size.y, size.z)
 
-    // Scale: head ≈ 27% of body (body = 2.2 units)
-    const fScale = maxDim > 0 ? 0.6 / maxDim : 1
+    // Head ≈ 33% of body height (body = 2.2 units → head = 0.72)
+    const fScale = maxDim > 0 ? 0.72 / maxDim : 1
 
-    // After scaling, bottom of face is at (min.y - center.y) * fScale in local space
+    // Bottom of face in local scaled coords
     const faceBottomLocal = (box.min.y - center.y) * fScale
 
-    // Body top ≈ 1.1 (body scaled to 2.2, centered at 0 → top = 1.1)
-    // Sit face bottom on body top + small gap
-    const targetY = 1.08 - faceBottomLocal
+    // Body top ≈ 1.1  (body scaled 2.2, centered at 0)
+    // Sit face bottom right on body top
+    const targetY = 1.1 - faceBottomLocal
 
     return {
       faceClone: clone,
       faceScale: fScale,
-      // Center horizontally, position vertically
-      faceOffset: [-center.x * fScale, targetY - center.y * fScale, -center.z * fScale] as [number, number, number],
+      facePosition: [
+        -center.x * fScale,
+        targetY - center.y * fScale,
+        -center.z * fScale,
+      ] as [number, number, number],
     }
   }, [scene])
 
-  useFrame((state) => {
-    if (autoRotate && groupRef.current) {
-      groupRef.current.rotation.y = state.clock.elapsedTime * 0.45
-    }
-  })
-
   return (
-    <group ref={groupRef} scale={faceScale} position={faceOffset}>
+    <group scale={faceScale} position={facePosition}>
       <primitive object={faceClone} />
     </group>
   )
@@ -150,17 +134,18 @@ export default function CharacterViewer({
         <directionalLight position={[-5, 4, 2]} intensity={0.6} color="#FFF3CC" />
         <directionalLight position={[1, -3, -4]} intensity={0.25} color="#C8DDFF" />
 
-        {/* Body — always shown */}
-        <Suspense fallback={<Spinner />}>
-          <BodyModel url={bodyUrl} color={bodyColor} autoRotate={!interactive} />
-        </Suspense>
-
-        {/* Face — only mounted when faceUrl exists (hooks inside FaceModel are unconditional) */}
-        {faceUrl && (
-          <Suspense fallback={null}>
-            <FaceModel url={faceUrl} autoRotate={!interactive} />
+        {/* Single RotatingGroup → body + face always rotate in sync */}
+        <RotatingGroup autoRotate={!interactive}>
+          <Suspense fallback={<Spinner />}>
+            <BodyModel url={bodyUrl} color={bodyColor} />
           </Suspense>
-        )}
+
+          {faceUrl && (
+            <Suspense fallback={null}>
+              <FaceModel url={faceUrl} />
+            </Suspense>
+          )}
+        </RotatingGroup>
 
         {interactive && (
           <OrbitControls
