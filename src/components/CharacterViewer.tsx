@@ -27,14 +27,17 @@ function FaceModel({ url, bodyTopY }: { url: string; bodyTopY: number }) {
     box.getCenter(center)
     const size = new THREE.Vector3()
     box.getSize(size)
+    // maxDim = face height (Y axis after Three.js applies node transforms)
     const maxDim = Math.max(size.x, size.y, size.z)
 
-    // Scale face to fill the head on the body STL
-    const targetHeadSize = bodyTopY * 0.65
+    // Head height ≈ 60% of bodyTopY — face top must align exactly with bodyTopY
+    const headFraction = 0.60
+    const targetHeadSize = bodyTopY * headFraction
     const fScale = maxDim > 0 ? targetHeadSize / maxDim : 1
 
-    // Neck joint position
-    const neckY = bodyTopY * 0.44
+    // neckY = bodyTopY - headHeight  →  guarantees face_top = bodyTopY exactly
+    const neckY = bodyTopY - targetHeadSize
+    // facePositionY places box.min.y (neck base in GLB world coords) at neckY
     const facePositionY = neckY - box.min.y * fScale
 
     return {
