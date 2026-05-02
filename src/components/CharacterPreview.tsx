@@ -72,7 +72,7 @@ export default function CharacterPreview({ config }: Props) {
   const {
     style = 'mini',
     skin = '#FDBCB4',
-    faceExpression = 'smile',
+    faceExpression = 'face1',
     hairStyle = 'short-straight',
     hairColor = '#2C1810',
     topColor = '#3B82F6',
