@@ -28,6 +28,17 @@ export default function Header() {
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
 
+  useEffect(() => {
+    const saved = localStorage.getItem('brickme-lang') as 'th' | 'en' | null
+    if (saved && saved !== language) setLanguage(saved)
+  }, [])
+
+  const toggleLanguage = () => {
+    const next = language === 'th' ? 'en' : 'th'
+    setLanguage(next)
+    localStorage.setItem('brickme-lang', next)
+  }
+
   const isActive = (href: string) => pathname === href
 
   return (
@@ -74,7 +85,7 @@ export default function Header() {
             {/* Right Actions */}
             <div className="flex items-center gap-2">
               <button
-                onClick={() => setLanguage(language === 'th' ? 'en' : 'th')}
+                onClick={toggleLanguage}
                 className="hidden md:flex items-center px-3 py-1.5 rounded-lg border-2 border-brand-dark bg-white text-xs font-display font-black shadow-[2px_2px_0_#1A1A1A] hover:bg-brand-yellow hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[1px_1px_0_#1A1A1A] transition-all duration-75 focus-ring"
                 aria-label="Toggle language"
               >
@@ -155,7 +166,7 @@ export default function Header() {
 
               <div className="flex items-center gap-3 mt-4">
                 <button
-                  onClick={() => setLanguage(language === 'th' ? 'en' : 'th')}
+                  onClick={toggleLanguage}
                   className="flex-1 py-3 rounded-lg border-3 border-brand-dark font-display font-black text-center bg-white shadow-brick-sm hover:bg-brand-yellow transition-all duration-75"
                 >
                   {language === 'th' ? 'EN' : 'TH'}

@@ -164,7 +164,7 @@ export default function Footer() {
         {/* Bottom bar */}
         <div className="border-t border-white/10 mt-12 pt-6 flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="font-body text-gray-500 text-sm">
-            &copy; 2567 BrickMe. สงวนลิขสิทธิ์ — สร้างด้วยความรักในประเทศไทย
+            &copy; {new Date().getFullYear()} BrickMe. สงวนลิขสิทธิ์ — สร้างด้วยความรักในประเทศไทย 🇹🇭
           </p>
           <div className="flex items-center gap-3">
             <span className="font-body text-gray-500 text-xs">รับชำระผ่าน</span>

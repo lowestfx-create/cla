@@ -2,13 +2,16 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import Image from 'next/image'
 import dynamic from 'next/dynamic'
-import { ArrowRight, Wand2, Package, Truck, Star, Gift, Gem, Heart } from 'lucide-react'
+import { ArrowRight, Wand2, Package, Truck, Star, Gift, Gem, Heart, ChevronRight, Users } from 'lucide-react'
 
 const MinifigureViewer = dynamic(() => import('@/components/MinifigureViewer'), {
   ssr: false,
   loading: () => (
-    <div className="w-full h-full flex items-center justify-center">
-      <div className="w-8 h-8 border-4 border-brand-dark border-t-transparent rounded-full animate-spin" />
+    <div className="w-full h-full flex items-center justify-center bg-brand-neutral/40">
+      <div className="text-center">
+        <div className="w-10 h-10 border-4 border-brand-dark border-t-brand-yellow rounded-full animate-spin mx-auto mb-2" />
+        <p className="font-display font-black text-xs text-brand-muted">โหลด 3D...</p>
+      </div>
     </div>
   ),
 })
@@ -28,7 +31,7 @@ const howItWorksSteps = [
     title: 'เลือก & ออกแบบ',
     desc: 'แต่งตัวละครได้ตามใจชอบ ผม หน้า เสื้อผ้า อุปกรณ์ ครบทุกรายละเอียด',
     bg: 'bg-brand-yellow',
-    shadow: 'shadow-brick',
+    iconColor: 'text-brand-dark',
     num: '01',
   },
   {
@@ -36,7 +39,7 @@ const howItWorksSteps = [
     title: 'ปริ้นต์ & ตรวจคุณภาพ',
     desc: 'ทีมงานปริ้นต์ 3D ด้วยเรซิ่น UV คุณภาพสูง ตรวจทุกชิ้นก่อนส่ง',
     bg: 'bg-brand-red',
-    shadow: 'shadow-brick',
+    iconColor: 'text-white',
     num: '02',
   },
   {
@@ -44,7 +47,7 @@ const howItWorksSteps = [
     title: 'ส่งถึงบ้านคุณ',
     desc: 'แพ็คสวยงาม ส่งเร็วผ่าน Kerry / Flash / J&T มีเลข tracking ทุกขั้น',
     bg: 'bg-brand-blue',
-    shadow: 'shadow-brick',
+    iconColor: 'text-white',
     num: '03',
   },
 ]
@@ -56,34 +59,43 @@ const useCases = [
     desc: 'วันเกิด ครบรอบ วาเลนไทน์ — ของขวัญที่ไม่เคยซ้ำใคร',
     href: '/shop?category=gift',
     bg: 'bg-brand-yellow',
-    iconColor: 'text-brand-dark',
-    border: 'border-brand-dark',
+    textColor: 'text-brand-dark',
+    subColor: 'text-brand-dark/65',
   },
   {
     Icon: Gift,
     title: 'งานแต่งงาน',
-    desc: 'Cake Topper บ่าวสาวที่หน้าเหมือนคุณจริงๆ ที่ระลึกไม่มีวางขาย',
+    desc: 'Cake Topper บ่าวสาวที่หน้าเหมือนคุณจริงๆ',
     href: '/shop?category=wedding',
     bg: 'bg-brand-red',
-    iconColor: 'text-white',
-    border: 'border-brand-dark',
+    textColor: 'text-white',
+    subColor: 'text-white/75',
   },
   {
     Icon: Gem,
     title: 'ของสะสม',
-    desc: 'ตัวละครที่เป็นตัวคุณเอง 100% ไม่มีที่ไหนในโลกที่เหมือนกัน',
+    desc: 'ตัวละครที่เป็นตัวคุณ 100% ไม่มีที่ไหนในโลกเหมือน',
     href: '/shop?category=collect',
-    bg: 'bg-brand-green',
-    iconColor: 'text-white',
-    border: 'border-brand-dark',
+    bg: 'bg-brand-blue',
+    textColor: 'text-white',
+    subColor: 'text-white/75',
+  },
+  {
+    Icon: Users,
+    title: 'สั่งทำธุรกิจ',
+    desc: 'ขั้นต่ำ 10 ชิ้น ราคาพิเศษ พร้อมโลโก้บริษัท',
+    href: '/contact',
+    bg: 'bg-brand-dark',
+    textColor: 'text-white',
+    subColor: 'text-gray-400',
   },
 ]
 
 const stats = [
-  { value: '500+', label: 'ออเดอร์สำเร็จ' },
-  { value: '4.9', label: 'คะแนนเฉลี่ย' },
-  { value: '7–14', label: 'วันทำการ' },
-  { value: '100%', label: 'Custom ทุกชิ้น' },
+  { value: '500+', label: 'ออเดอร์สำเร็จ', icon: '📦' },
+  { value: '4.9', label: 'คะแนนเฉลี่ย', icon: '⭐' },
+  { value: '7–14', label: 'วันทำการ', icon: '🚚' },
+  { value: '100%', label: 'Custom ทุกชิ้น', icon: '✨' },
 ]
 
 export default function HomePage() {
@@ -93,44 +105,46 @@ export default function HomePage() {
   return (
     <>
       {/* ─── Hero ─── */}
-      <section className="relative min-h-[90vh] md:min-h-[85vh] bg-brand-yellow overflow-hidden flex items-center">
-        <div className="absolute inset-0 stud-pattern" />
+      <section className="relative min-h-[88vh] md:min-h-[82vh] bg-brand-yellow overflow-hidden flex items-center">
+        <div className="absolute inset-0 stud-pattern opacity-60" />
 
-        <div className="container-site relative z-10 py-24">
-          <div className="grid md:grid-cols-2 gap-12 items-center">
+        <div className="container-site relative z-10 py-20 md:py-24">
+          <div className="grid md:grid-cols-2 gap-10 md:gap-16 items-center">
 
-            {/* Text */}
+            {/* Left: Text */}
             <div>
               <div className="inline-flex items-center gap-2 bg-brand-dark text-brand-yellow px-4 py-2 rounded-lg border-3 border-brand-dark shadow-brick-sm mb-6 font-display font-black text-xs uppercase tracking-widest">
                 <Star size={12} className="fill-brand-yellow" />
                 ปริ้นต์ 3D คุณภาพระดับของขวัญ
               </div>
 
-              <h1 className="font-display font-black text-5xl md:text-6xl lg:text-7xl text-brand-dark leading-[0.95] mb-6">
+              <h1 className="font-display font-black text-5xl md:text-6xl lg:text-7xl text-brand-dark leading-[0.92] mb-6">
                 ตัวคุณ<br />
                 ในเวอร์ชัน<br />
-                <span className="bg-brand-dark text-brand-yellow px-2 inline-block -rotate-1">เลโก้</span>
+                <span className="relative inline-block bg-brand-dark text-brand-yellow px-3 -rotate-1 shadow-brick">
+                  เลโก้
+                </span>
               </h1>
 
-              <p className="font-body text-brand-dark/80 text-lg mb-8 leading-relaxed font-medium">
+              <p className="font-body text-brand-dark/80 text-lg mb-8 leading-relaxed">
                 ออกแบบ Minifigure Custom ด้วยตัวเอง<br />
-                ระยะเวลา 7–14 วัน — <strong>เริ่มต้นเพียง 590 บาท</strong>
+                <strong>เริ่มต้นเพียง 590 บาท</strong> · ส่งทั่วไทย · 7–14 วัน
               </p>
 
               <div className="flex flex-wrap gap-3">
-                <Link href="/customize" className="btn-dark text-base px-8 py-4">
+                <Link href="/customize" className="btn-dark text-base px-7 py-4">
                   <Wand2 size={20} />
                   เริ่ม Custom เลย
                 </Link>
-                <Link href="/shop" className="btn-secondary text-base px-8 py-4">
+                <Link href="/shop" className="btn-secondary text-base px-7 py-4">
                   ดูผลงาน
                   <ArrowRight size={18} />
                 </Link>
               </div>
 
               {/* Social proof */}
-              <div className="flex items-center gap-4 mt-8">
-                <div className="flex -space-x-2">
+              <div className="flex items-center gap-3 mt-8">
+                <div className="flex -space-x-2.5">
                   {[1, 2, 3, 4].map((i) => (
                     <div key={i} className="w-9 h-9 rounded-full border-3 border-brand-dark overflow-hidden bg-white shadow-brick-sm">
                       <Image
@@ -142,23 +156,21 @@ export default function HomePage() {
                     </div>
                   ))}
                 </div>
-                <div className="bg-brand-dark text-white px-4 py-2 rounded-lg border-2 border-brand-dark shadow-brick-sm">
-                  <div className="flex items-center gap-1 mb-0.5">
+                <div className="bg-brand-dark text-white px-4 py-2.5 rounded-xl border-2 border-brand-dark shadow-brick-sm">
+                  <div className="flex items-center gap-0.5 mb-0.5">
                     {Array.from({ length: 5 }).map((_, i) => (
-                      <Star key={i} size={12} className="fill-brand-yellow text-brand-yellow" />
+                      <Star key={i} size={11} className="fill-brand-yellow text-brand-yellow" />
                     ))}
                   </div>
-                  <p className="font-display font-black text-xs text-gray-300">ลูกค้าพึงพอใจ 500+ ออเดอร์</p>
+                  <p className="font-display font-black text-[11px] text-gray-300">ลูกค้าพึงพอใจ 500+ ออเดอร์</p>
                 </div>
               </div>
             </div>
 
-            {/* Hero Visual — 3D Minifigure */}
+            {/* Right: 3D viewer */}
             <div className="relative flex justify-center">
               <div className="relative w-full max-w-sm">
-
-                {/* 3D Canvas */}
-                <div className="w-72 h-80 md:w-80 md:h-96 mx-auto bg-white rounded-lg border-3 border-brand-dark shadow-brick-xl overflow-hidden relative">
+                <div className="w-72 h-80 md:w-80 md:h-96 mx-auto bg-white rounded-2xl border-3 border-brand-dark shadow-brick-xl overflow-hidden relative">
                   <MinifigureViewer
                     parts={{}}
                     topColor="#DA291C"
@@ -168,26 +180,21 @@ export default function HomePage() {
                     autoRotate
                     className="w-full h-full"
                   />
-                  {/* hint */}
-                  <p className="absolute bottom-2 left-0 right-0 text-center font-body text-[10px] text-brand-muted select-none pointer-events-none">
+                  <p className="absolute bottom-2 left-0 right-0 text-center font-body text-[10px] text-brand-muted/70 select-none pointer-events-none">
                     ลากเพื่อหมุน · เลื่อนเพื่อซูม
                   </p>
                 </div>
 
-                {/* Floating badge - top left */}
-                <div className="absolute -left-4 top-8 bg-brand-red text-white rounded-lg border-3 border-brand-dark shadow-brick p-3">
+                {/* Floating badges */}
+                <div className="absolute -left-4 md:-left-6 top-6 bg-brand-red text-white rounded-xl border-3 border-brand-dark shadow-brick p-3">
                   <p className="font-display font-black text-xs">Custom 100%</p>
                   <p className="font-body text-[10px] text-red-200">ออกแบบเองทุกอย่าง</p>
                 </div>
-
-                {/* Floating badge - bottom right */}
-                <div className="absolute -right-4 bottom-16 bg-brand-blue text-white rounded-lg border-3 border-brand-dark shadow-brick p-3">
+                <div className="absolute -right-4 md:-right-6 bottom-16 bg-brand-blue text-white rounded-xl border-3 border-brand-dark shadow-brick p-3">
                   <p className="font-display font-black text-xs">ส่งเร็ว 7–14 วัน</p>
                   <p className="font-body text-[10px] text-blue-200">มี tracking ทุกชิ้น</p>
                 </div>
-
-                {/* Price tag */}
-                <div className="absolute -bottom-5 left-1/2 -translate-x-1/2 bg-brand-dark text-brand-yellow rounded-lg border-3 border-brand-dark shadow-brick px-5 py-2 whitespace-nowrap">
+                <div className="absolute -bottom-5 left-1/2 -translate-x-1/2 bg-brand-dark text-brand-yellow rounded-xl border-3 border-brand-dark shadow-brick px-5 py-2.5 whitespace-nowrap">
                   <p className="font-display font-black text-sm">เริ่มต้น 590฿</p>
                 </div>
               </div>
@@ -195,19 +202,17 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* Bottom brick row */}
-        <div className="absolute bottom-0 left-0 right-0">
-          <div className="brick-row" />
-        </div>
+        <div className="absolute bottom-0 left-0 right-0 brick-row" />
       </section>
 
       {/* ─── Stats ─── */}
-      <section className="bg-brand-dark py-10">
-        <div className="container-site">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <section className="bg-brand-dark">
+        <div className="container-site py-10 md:py-12">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-0 divide-x divide-white/10">
             {stats.map((stat, i) => (
-              <div key={i} className="text-center">
-                <p className="font-display font-black text-4xl text-brand-yellow">{stat.value}</p>
+              <div key={i} className="text-center py-2 px-4">
+                <p className="text-2xl mb-1">{stat.icon}</p>
+                <p className="font-display font-black text-3xl md:text-4xl text-brand-yellow">{stat.value}</p>
                 <p className="font-body text-gray-400 text-sm mt-1">{stat.label}</p>
               </div>
             ))}
@@ -219,21 +224,35 @@ export default function HomePage() {
       {/* ─── How It Works ─── */}
       <section className="py-20 bg-brand-neutral">
         <div className="container-site">
-          <div className="text-center mb-12">
+          <div className="text-center mb-14">
             <span className="section-label">วิธีสั่งซื้อ</span>
             <h2 className="section-title">สั่งง่าย ใน 3 ขั้นตอน</h2>
             <p className="section-subtitle">ไม่ต้องมีประสบการณ์ออกแบบ ก็ได้ตัวละครที่เป็นตัวเองได้</p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-6 md:gap-8">
+          <div className="grid md:grid-cols-3 gap-6 md:gap-4 relative">
+            {/* Connecting line on desktop */}
+            <div className="hidden md:block absolute top-10 left-[calc(16.67%+1rem)] right-[calc(16.67%+1rem)] h-0.5 bg-brand-dark/15 z-0" />
+
             {howItWorksSteps.map((step, i) => (
-              <div key={i} className="card p-8 text-center group hover:-translate-x-[1px] hover:-translate-y-[1px] hover:shadow-card-hover transition-all duration-100">
-                <div className={`w-16 h-16 ${step.bg} rounded-lg border-3 border-brand-dark shadow-brick flex items-center justify-center mx-auto mb-5`}>
-                  <step.icon size={26} className={step.bg === 'bg-brand-yellow' ? 'text-brand-dark' : 'text-white'} />
+              <div key={i} className="relative z-10">
+                <div className="card p-7 md:p-8 text-center group hover:-translate-x-[1px] hover:-translate-y-[1px] hover:shadow-card-hover transition-all duration-100 h-full">
+                  {/* Step number badge */}
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 bg-brand-dark text-brand-yellow font-display font-black text-[10px] rounded-full border-2 border-brand-dark">
+                    {step.num}
+                  </div>
+
+                  <div className={`w-16 h-16 ${step.bg} rounded-xl border-3 border-brand-dark shadow-brick flex items-center justify-center mx-auto mb-5 mt-2`}>
+                    <step.icon size={26} className={step.iconColor} />
+                  </div>
+                  <h3 className="font-display font-black text-xl text-brand-dark mb-3">{step.title}</h3>
+                  <p className="font-body text-brand-muted leading-relaxed text-sm">{step.desc}</p>
+
+                  {/* Arrow to next step */}
+                  {i < howItWorksSteps.length - 1 && (
+                    <ChevronRight size={20} className="hidden md:block absolute -right-3 top-10 text-brand-dark/30 z-20" />
+                  )}
                 </div>
-                <div className="font-display font-black text-6xl text-gray-100 mb-2 leading-none select-none">{step.num}</div>
-                <h3 className="font-display font-black text-xl text-brand-dark mb-2">{step.title}</h3>
-                <p className="font-body text-brand-muted leading-relaxed text-sm">{step.desc}</p>
               </div>
             ))}
           </div>
@@ -258,24 +277,24 @@ export default function HomePage() {
             <p className="section-subtitle">ไม่ว่าจะเป็นของขวัญหรือของสะสม BrickMe มีคำตอบให้ทุกโมเมนต์</p>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             {useCases.map((uc, i) => (
               <Link
                 key={i}
                 href={uc.href}
-                className={`${uc.bg} rounded-lg border-3 ${uc.border} shadow-brick p-6 md:p-7 hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-brick-sm transition-all duration-100 focus-ring group block`}
+                className={`${uc.bg} rounded-xl border-3 border-brand-dark shadow-brick p-5 md:p-6 hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-brick-sm transition-all duration-100 focus-ring group block`}
               >
-                <div className={`w-12 h-12 bg-white/20 border-2 border-white/40 rounded-lg flex items-center justify-center mb-4`}>
-                  <uc.Icon size={22} className={uc.iconColor} />
+                <div className="w-11 h-11 bg-white/15 border border-white/30 rounded-lg flex items-center justify-center mb-4">
+                  <uc.Icon size={20} className={uc.textColor} />
                 </div>
-                <h3 className={`font-display font-black text-lg mb-2 ${uc.bg === 'bg-brand-yellow' ? 'text-brand-dark' : 'text-white'}`}>
+                <h3 className={`font-display font-black text-base md:text-lg mb-1.5 ${uc.textColor}`}>
                   {uc.title}
                 </h3>
-                <p className={`font-body text-sm leading-relaxed ${uc.bg === 'bg-brand-yellow' ? 'text-brand-dark/70' : 'text-white/80'}`}>
+                <p className={`font-body text-sm leading-relaxed ${uc.subColor}`}>
                   {uc.desc}
                 </p>
-                <div className={`flex items-center gap-1 mt-4 font-display font-black text-sm group-hover:gap-2 transition-all duration-100 ${uc.bg === 'bg-brand-yellow' ? 'text-brand-dark' : 'text-white'}`}>
-                  ดูเพิ่มเติม <ArrowRight size={14} />
+                <div className={`flex items-center gap-1 mt-4 font-display font-black text-xs group-hover:gap-2 transition-all duration-100 ${uc.textColor}`}>
+                  ดูเพิ่มเติม <ArrowRight size={12} />
                 </div>
               </Link>
             ))}

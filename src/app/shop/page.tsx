@@ -1,10 +1,9 @@
 'use client'
 import { useState, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Filter, Search, SlidersHorizontal } from 'lucide-react'
+import { Search, X, SlidersHorizontal, ArrowRight } from 'lucide-react'
 import ProductCard from '@/components/ProductCard'
 import { PRODUCTS } from '@/lib/data'
-import { Product } from '@/types'
 
 const CATEGORIES = [
   { value: 'all', label: 'ทั้งหมด' },
@@ -16,15 +15,15 @@ const CATEGORIES = [
 
 const GENDERS = [
   { value: 'all', label: 'ทุกเพศ' },
-  { value: 'male', label: 'ผู้ชาย' },
-  { value: 'female', label: 'ผู้หญิง' },
+  { value: 'male', label: 'ชาย' },
+  { value: 'female', label: 'หญิง' },
   { value: 'unisex', label: 'Unisex' },
 ]
 
 const SORTS = [
   { value: 'default', label: 'แนะนำ' },
-  { value: 'price-asc', label: 'ราคา: น้อย → มาก' },
-  { value: 'price-desc', label: 'ราคา: มาก → น้อย' },
+  { value: 'price-asc', label: 'ราคา น้อย→มาก' },
+  { value: 'price-desc', label: 'ราคา มาก→น้อย' },
   { value: 'new', label: 'ใหม่ล่าสุด' },
 ]
 
@@ -33,91 +32,116 @@ export default function ShopPage() {
   const [category, setCategory] = useState('all')
   const [gender, setGender] = useState('all')
   const [sort, setSort] = useState('default')
-  const [showFilters, setShowFilters] = useState(false)
+  const [showMobileFilters, setShowMobileFilters] = useState(false)
+
+  const hasActiveFilter = category !== 'all' || gender !== 'all' || search !== ''
 
   const filtered = useMemo(() => {
     let list = [...PRODUCTS]
-
     if (search) {
       const q = search.toLowerCase()
       list = list.filter((p) => p.nameTH.toLowerCase().includes(q) || p.descriptionTH.toLowerCase().includes(q))
     }
     if (category !== 'all') list = list.filter((p) => p.category === category)
     if (gender !== 'all') list = list.filter((p) => p.gender === gender)
-
     switch (sort) {
       case 'price-asc': list.sort((a, b) => a.price - b.price); break
       case 'price-desc': list.sort((a, b) => b.price - a.price); break
       case 'new': list = list.filter((p) => p.badge === 'new').concat(list.filter((p) => p.badge !== 'new')); break
     }
-
     return list
   }, [search, category, gender, sort])
 
+  const clearAll = () => { setSearch(''); setCategory('all'); setGender('all'); setSort('default') }
+
   return (
     <div className="min-h-screen bg-brand-neutral">
-      {/* Header */}
-      <div className="bg-white border-b border-gray-100">
-        <div className="container-site py-10">
-          <h1 className="font-display font-black text-4xl md:text-5xl text-brand-dark">
-            Shop & Gallery
-          </h1>
-          <p className="font-body text-brand-muted mt-2 text-lg">
-            ผลงานทั้งหมด {PRODUCTS.length} แบบ — หรือ{' '}
-            <a href="/customize" className="text-brand-dark font-bold underline underline-offset-2">
-              Custom ใหม่เอง
+      {/* Page header */}
+      <div className="bg-white border-b-3 border-brand-dark shadow-[0_3px_0_#FFD700]">
+        <div className="container-site py-8 md:py-10">
+          <div className="flex items-end justify-between">
+            <div>
+              <span className="section-label mb-2">ผลงานทั้งหมด</span>
+              <h1 className="font-display font-black text-3xl md:text-5xl text-brand-dark leading-tight">
+                Shop & Gallery
+              </h1>
+              <p className="font-body text-brand-muted mt-1.5 text-base">
+                {PRODUCTS.length} แบบ — หรือ{' '}
+                <a href="/customize" className="text-brand-dark font-bold underline underline-offset-2 hover:text-brand-red transition-colors">
+                  Custom ใหม่เองได้เลย
+                </a>
+              </p>
+            </div>
+            <a
+              href="/customize"
+              className="hidden md:flex btn-primary text-sm py-2.5 px-5"
+            >
+              Custom ตัวเอง <ArrowRight size={16} />
             </a>
-          </p>
+          </div>
         </div>
       </div>
 
-      <div className="container-site py-8">
-        {/* Search + Filter bar */}
-        <div className="flex flex-col md:flex-row gap-3 mb-6">
+      <div className="container-site py-6 md:py-8">
+
+        {/* ── Search + Sort bar ── */}
+        <div className="flex gap-3 mb-4">
           <div className="relative flex-1">
-            <Search size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-brand-muted" />
+            <Search size={17} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-brand-muted pointer-events-none" />
             <input
               type="search"
               placeholder="ค้นหาสินค้า..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-10 pr-4 py-3 bg-white rounded-xl border border-gray-200 font-body text-brand-dark placeholder:text-gray-400 focus:outline-none focus:border-brand-yellow transition-colors"
+              className="w-full pl-10 pr-10 py-3 bg-white rounded-xl border-2 border-brand-dark/20 font-body text-brand-dark placeholder:text-gray-400 focus:outline-none focus:border-brand-yellow shadow-brick-sm transition-colors"
             />
+            {search && (
+              <button
+                onClick={() => setSearch('')}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-brand-muted hover:text-brand-dark"
+                aria-label="ล้างการค้นหา"
+              >
+                <X size={16} />
+              </button>
+            )}
           </div>
 
-          <button
-            onClick={() => setShowFilters(!showFilters)}
-            className="md:hidden btn-outline gap-2 py-3"
+          {/* Sort — always visible */}
+          <select
+            value={sort}
+            onChange={(e) => setSort(e.target.value)}
+            className="px-3 py-3 bg-white rounded-xl border-2 border-brand-dark/20 font-body text-brand-dark text-sm focus:outline-none focus:border-brand-yellow shadow-brick-sm transition-colors flex-shrink-0"
           >
-            <SlidersHorizontal size={18} />
-            ตัวกรอง
-          </button>
+            {SORTS.map((s) => (
+              <option key={s.value} value={s.value}>{s.label}</option>
+            ))}
+          </select>
 
-          <div className="hidden md:flex items-center gap-2">
-            <select
-              value={sort}
-              onChange={(e) => setSort(e.target.value)}
-              className="px-4 py-3 bg-white rounded-xl border border-gray-200 font-body text-brand-dark text-sm focus:outline-none focus:border-brand-yellow transition-colors"
-            >
-              {SORTS.map((s) => (
-                <option key={s.value} value={s.value}>{s.label}</option>
-              ))}
-            </select>
-          </div>
+          {/* Mobile filter toggle */}
+          <button
+            onClick={() => setShowMobileFilters(!showMobileFilters)}
+            className={`md:hidden flex items-center gap-1.5 px-3 py-3 rounded-xl border-2 font-display font-bold text-sm shadow-brick-sm transition-all flex-shrink-0 ${showMobileFilters ? 'bg-brand-yellow border-brand-dark' : 'bg-white border-brand-dark/20'}`}
+          >
+            <SlidersHorizontal size={16} />
+            {hasActiveFilter && <span className="w-2 h-2 rounded-full bg-brand-red" />}
+          </button>
         </div>
 
-        {/* Category chips */}
-        <div className={`${showFilters ? 'block' : 'hidden md:block'} mb-6`}>
-          <div className="bg-white rounded-2xl p-4 md:p-0 md:bg-transparent">
-            <div className="mb-3 md:mb-0 flex flex-wrap gap-2">
+        {/* ── Filters ── */}
+        {/* Desktop: always shown */}
+        <div className={`${showMobileFilters ? 'block' : 'hidden md:block'} mb-5`}>
+          <div className="bg-white rounded-2xl border-2 border-brand-dark/10 p-4 shadow-brick-sm">
+            {/* Category row */}
+            <div className="flex flex-wrap gap-2 mb-3">
+              <span className="font-display font-bold text-xs text-brand-muted self-center mr-1 hidden md:block">หมวด:</span>
               {CATEGORIES.map((c) => (
                 <button
                   key={c.value}
                   onClick={() => setCategory(c.value)}
-                  className={`px-4 py-2 rounded-full font-display font-semibold text-sm transition-all duration-200 ${
+                  className={`px-3.5 py-1.5 rounded-full font-display font-bold text-sm transition-all duration-150 ${
                     category === c.value
                       ? 'bg-brand-dark text-white shadow-md'
-                      : 'bg-white text-brand-muted hover:bg-brand-neutral border border-gray-200'
+                      : 'bg-brand-neutral text-brand-muted hover:bg-brand-yellow/30 hover:text-brand-dark'
                   }`}
                 >
                   {c.label}
@@ -125,52 +149,45 @@ export default function ShopPage() {
               ))}
             </div>
 
-            <div className="flex flex-wrap gap-2 mt-3 pt-3 border-t border-gray-100 md:border-0 md:mt-0 md:pt-0 md:hidden">
+            {/* Gender + clear row */}
+            <div className="flex flex-wrap gap-2 pt-3 border-t border-gray-100 items-center">
+              <span className="font-display font-bold text-xs text-brand-muted mr-1 hidden md:block">เพศ:</span>
               {GENDERS.map((g) => (
                 <button
                   key={g.value}
                   onClick={() => setGender(g.value)}
-                  className={`px-3 py-1.5 rounded-full font-display font-semibold text-xs transition-all duration-200 ${
+                  className={`px-3 py-1 rounded-full font-display font-bold text-xs transition-all duration-150 ${
                     gender === g.value
-                      ? 'bg-brand-yellow text-brand-dark'
-                      : 'bg-gray-100 text-brand-muted'
+                      ? 'bg-brand-yellow text-brand-dark shadow-sm'
+                      : 'bg-brand-neutral text-brand-muted hover:bg-brand-yellow/30 hover:text-brand-dark'
                   }`}
                 >
                   {g.label}
                 </button>
               ))}
+              {hasActiveFilter && (
+                <button
+                  onClick={clearAll}
+                  className="ml-auto flex items-center gap-1 px-3 py-1 text-xs font-display font-bold text-brand-red bg-red-50 hover:bg-red-100 rounded-full transition-colors"
+                >
+                  <X size={11} /> ล้างตัวกรอง
+                </button>
+              )}
             </div>
           </div>
         </div>
 
-        {/* Results count */}
-        <div className="flex items-center justify-between mb-6">
+        {/* ── Results count ── */}
+        <div className="flex items-center justify-between mb-5">
           <p className="font-body text-brand-muted text-sm">
-            แสดง <span className="font-bold text-brand-dark">{filtered.length}</span> รายการ
+            พบ <span className="font-bold text-brand-dark">{filtered.length}</span> รายการ
+            {hasActiveFilter && <span className="text-brand-red ml-1">(กรองอยู่)</span>}
           </p>
-          <div className="hidden md:flex gap-2">
-            {GENDERS.map((g) => (
-              <button
-                key={g.value}
-                onClick={() => setGender(g.value)}
-                className={`px-3 py-1.5 rounded-full font-display font-semibold text-xs transition-all duration-200 ${
-                  gender === g.value
-                    ? 'bg-brand-yellow text-brand-dark'
-                    : 'bg-white text-brand-muted border border-gray-200'
-                }`}
-              >
-                {g.label}
-              </button>
-            ))}
-          </div>
         </div>
 
-        {/* Grid */}
+        {/* ── Product grid ── */}
         {filtered.length > 0 ? (
-          <motion.div
-            layout
-            className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6"
-          >
+          <motion.div layout className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-5">
             <AnimatePresence>
               {filtered.map((p) => (
                 <motion.div
@@ -178,8 +195,8 @@ export default function ShopPage() {
                   layout
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.95 }}
-                  transition={{ duration: 0.2 }}
+                  exit={{ opacity: 0, scale: 0.92 }}
+                  transition={{ duration: 0.18 }}
                 >
                   <ProductCard product={p} />
                 </motion.div>
@@ -188,25 +205,34 @@ export default function ShopPage() {
           </motion.div>
         ) : (
           <div className="text-center py-20">
-            <div className="text-6xl mb-4">🔍</div>
-            <p className="font-display font-bold text-xl text-brand-dark mb-2">ไม่พบสินค้าที่ค้นหา</p>
-            <p className="font-body text-brand-muted mb-6">ลองเปลี่ยนคำค้นหา หรือ Custom แบบใหม่เองเลย</p>
-            <a href="/customize" className="btn-primary">Custom แบบของตัวเอง →</a>
+            <div className="w-20 h-20 mx-auto mb-5 bg-brand-neutral rounded-2xl border-3 border-brand-dark shadow-brick flex items-center justify-center">
+              <Search size={32} className="text-brand-muted" />
+            </div>
+            <p className="font-display font-bold text-xl text-brand-dark mb-2">ไม่พบสินค้า</p>
+            <p className="font-body text-brand-muted mb-6">ลองเปลี่ยนตัวกรอง หรือ Custom แบบใหม่เองเลย</p>
+            <div className="flex gap-3 justify-center">
+              {hasActiveFilter && (
+                <button onClick={clearAll} className="btn-outline">
+                  ล้างตัวกรอง
+                </button>
+              )}
+              <a href="/customize" className="btn-primary">Custom แบบของตัวเอง</a>
+            </div>
           </div>
         )}
 
-        {/* B2B CTA */}
-        <div className="mt-16 bg-brand-dark rounded-3xl p-8 md:p-12 flex flex-col md:flex-row items-center justify-between gap-6">
-          <div>
-            <p className="font-display font-black text-white text-2xl md:text-3xl mb-2">สั่งทำสำหรับบริษัท?</p>
-            <p className="font-body text-gray-400">ขั้นต่ำ 10 ชิ้น • ราคาพิเศษ • พร้อมโลโก้บริษัทบนฐาน</p>
+        {/* ── B2B CTA ── */}
+        <div className="mt-16 rounded-2xl border-3 border-brand-dark shadow-brick overflow-hidden">
+          <div className="bg-brand-dark p-8 md:p-10 flex flex-col md:flex-row items-center justify-between gap-6">
+            <div>
+              <p className="font-display font-black text-white text-2xl md:text-3xl mb-1.5">สั่งทำสำหรับบริษัท?</p>
+              <p className="font-body text-gray-400">ขั้นต่ำ 10 ชิ้น • ราคาพิเศษ • พร้อมโลโก้บริษัทบนฐาน</p>
+            </div>
+            <a href="/contact" className="flex-shrink-0 btn-primary">
+              ติดต่อทีม B2B <ArrowRight size={16} />
+            </a>
           </div>
-          <a
-            href="/contact"
-            className="flex-shrink-0 bg-brand-yellow text-brand-dark font-display font-bold px-7 py-3.5 rounded-xl hover:bg-yellow-400 transition-colors"
-          >
-            ติดต่อทีม B2B →
-          </a>
+          <div className="brick-row-yellow" />
         </div>
       </div>
     </div>
