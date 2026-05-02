@@ -33,6 +33,22 @@ function FaceModel({ url, bodyTopY }: { url: string; bodyTopY: number }) {
 
   const { faceClone, faceScale, facePosition } = useMemo(() => {
     const clone = scene.clone(true)
+
+    // GLTF loads textures with flipY=false (V=0 at bottom in WebGL).
+    // Mecabricks UV has front expression at V<0.5 = TOP of image.
+    // With flipY=false, V<0.5 maps to bottom → shows BACK expression.
+    // Fix: flip all textures so V=0 maps to top → front expression shows correctly.
+    clone.traverse((obj) => {
+      const mesh = obj as THREE.Mesh
+      if (!mesh.isMesh) return
+      const mats = Array.isArray(mesh.material) ? mesh.material : [mesh.material]
+      mats.forEach((mat) => {
+        const m = mat as THREE.MeshStandardMaterial
+        if (m.map) { m.map.flipY = true; m.map.needsUpdate = true }
+        m.needsUpdate = true
+      })
+    })
+
     const box = new THREE.Box3().setFromObject(clone)
     const center = new THREE.Vector3()
     box.getCenter(center)
