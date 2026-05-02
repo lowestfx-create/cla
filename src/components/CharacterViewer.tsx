@@ -61,7 +61,7 @@ function FaceModel({ url, bodyTopY }: { url: string; bodyTopY: number }) {
         -center.z * fScale,
       ] as [number, number, number],
     }
-  }, [scene, bodyTopY, texture])
+  }, [scene, bodyTopY])
 
   return (
     <group scale={faceScale} position={facePosition}>
