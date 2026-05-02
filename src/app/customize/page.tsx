@@ -16,7 +16,6 @@ import ProgressBar from '@/components/ProgressBar'
 import ColorPicker from '@/components/ColorPicker'
 import PricePill from '@/components/PricePill'
 import CharacterPreview from '@/components/CharacterPreview'
-import { useFaceThumbnails, FaceThumb } from '@/components/FaceViewer'
 
 const BodyViewer = dynamic(() => import('@/components/BodyViewer'), { ssr: false })
 
@@ -28,14 +27,13 @@ const STYLES = [
 ]
 
 const FACES = [
-  { id: 'face1',     label: 'หน้า 1',       glb: '/parts/face/face1.glb' },
-  { id: 'face2',     label: 'หน้า 2',       glb: '/parts/face/face2.glb' },
-  { id: 'face3',     label: 'หน้า 3',       glb: '/parts/face/face3.glb' },
-  { id: 'face5',     label: 'หน้า 5',       glb: '/parts/face/face5.glb' },
-  { id: 'face6',     label: 'หน้า 6',       glb: '/parts/face/face6.glb' },
-  { id: 'face7',     label: 'หน้า 7',       glb: '/parts/face/face7.glb' },
-  { id: 'face8',     label: 'หน้า 8',       glb: '/parts/face/face8.glb' },
-  { id: 'face-scary',label: 'ยิ้มน่ากลัว', glb: '/parts/face/face-scary.glb' },
+  { id: 'face1', label: 'น่ากลัว',     img: '/parts/face/face1_preview.png' },
+  { id: 'face2', label: 'โกรธ',        img: '/parts/face/face2_preview.png' },
+  { id: 'face3', label: 'ยิ้มซ่า',     img: '/parts/face/face3_preview.png' },
+  { id: 'face4', label: 'หน้ากาก',     img: '/parts/face/face4_preview.png' },
+  { id: 'face5', label: 'มั่นใจ',      img: '/parts/face/face5_preview.png' },
+  { id: 'face6', label: 'ไซบอร์ก',    img: '/parts/face/face6_preview.png' },
+  { id: 'face7', label: 'แว้บ',        img: '/parts/face/face7_preview.png' },
 ]
 
 const HAIR_STYLES = [
@@ -196,7 +194,6 @@ function CustomizePageInner() {
   const [step, setStep] = useState(0)
   const [note, setNote] = useState('')
   const [baseName, setBaseName] = useState('')
-  const faceThumbs = useFaceThumbnails(FACES.map((f) => f.glb), config.skin ?? '#FDBCB4')
 
   useEffect(() => {
     const preset = searchParams.get('preset')
@@ -407,15 +404,21 @@ function CustomizePageInner() {
                       <div>
                         <p className="font-display font-bold text-brand-dark mb-3">อารมณ์ / Expression</p>
                         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                          {FACES.map((f, i) => (
+                          {FACES.map((f) => (
                             <RadioCard
                               key={f.id}
                               selected={config.faceExpression === f.id}
                               onClick={() => updateConfig({ faceExpression: f.id })}
                               compact
                             >
-                              <div className="w-full h-24 rounded-lg overflow-hidden bg-brand-neutral/20">
-                                <FaceThumb dataUrl={faceThumbs[i] ?? null} className="w-full h-full" />
+                              <div className="w-full h-24 rounded-lg overflow-hidden bg-brand-neutral/10 flex items-center justify-center">
+                                {/* eslint-disable-next-line @next/next/no-img-element */}
+                                <img
+                                  src={f.img}
+                                  alt={f.label}
+                                  className="w-full h-full object-contain"
+                                  draggable={false}
+                                />
                               </div>
                               <p className="font-body text-xs text-brand-muted mt-1">{f.label}</p>
                             </RadioCard>
