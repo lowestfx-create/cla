@@ -1,65 +1,27 @@
 'use client'
-import { Suspense, useMemo, useRef, useState } from 'react'
+import { Suspense, useMemo, useRef } from 'react'
 import { Canvas, useLoader, useFrame } from '@react-three/fiber'
 import { useGLTF, OrbitControls } from '@react-three/drei'
 import { STLLoader } from 'three/examples/jsm/loaders/STLLoader.js'
 import * as THREE from 'three'
 
-// ─── Rotating parent — body + face share ONE rotation so they always sync ────
+// ─── Gentle sway so back-of-head never shows ─────────────────────────────────
 function RotatingGroup({ autoRotate, children }: { autoRotate: boolean; children: React.ReactNode }) {
   const ref = useRef<THREE.Group>(null)
   useFrame((state) => {
     if (autoRotate && ref.current) {
-      // Gentle sway ±25° so back of head never shows
       ref.current.rotation.y = Math.sin(state.clock.elapsedTime * 0.65) * 0.44
     }
   })
   return <group ref={ref}>{children}</group>
 }
 
-// ─── Body (STL) ──────────────────────────────────────────────────────────────
-function BodyModel({ url, color, onBodyTop }: { url: string; color: string; onBodyTop?: (y: number) => void }) {
-  const geometry = useLoader(STLLoader, url)
-
-  const { scale, centerOffset, bodyTopY } = useMemo(() => {
-    geometry.computeVertexNormals()
-    geometry.computeBoundingBox()
-    const box = geometry.boundingBox!
-    const center = new THREE.Vector3()
-    box.getCenter(center)
-    const size = new THREE.Vector3()
-    box.getSize(size)
-    const maxDim = Math.max(size.x, size.y, size.z)
-    const s = maxDim > 0 ? 2.2 / maxDim : 1
-    // actual top of body in world units after centering
-    const topY = (box.max.y - center.y) * s
-    return {
-      scale: s,
-      centerOffset: [-center.x, -center.y, -center.z] as [number, number, number],
-      bodyTopY: topY,
-    }
-  }, [geometry])
-
-  // Report body top so FaceModel can sit on it correctly
-  if (onBodyTop) onBodyTop(bodyTopY)
-
-  return (
-    <group scale={scale}>
-      <mesh position={centerOffset} castShadow receiveShadow>
-        <primitive object={geometry} attach="geometry" />
-        <meshStandardMaterial color={color} roughness={0.4} metalness={0.08} envMapIntensity={0.6} />
-      </mesh>
-    </group>
-  )
-}
-
-// ─── Face (GLB with baked texture) ───────────────────────────────────────────
+// ─── Face GLB — receives exact bodyTopY computed from loaded body ─────────────
 function FaceModel({ url, bodyTopY }: { url: string; bodyTopY: number }) {
   const { scene } = useGLTF(url)
 
   const { faceClone, faceScale, facePosition } = useMemo(() => {
     const clone = scene.clone(true)
-
     const box = new THREE.Box3().setFromObject(clone)
     const center = new THREE.Vector3()
     box.getCenter(center)
@@ -67,12 +29,11 @@ function FaceModel({ url, bodyTopY }: { url: string; bodyTopY: number }) {
     box.getSize(size)
     const maxDim = Math.max(size.x, size.y, size.z)
 
-    // Head ≈ 32% of body height
     const fScale = maxDim > 0 ? 0.70 / maxDim : 1
 
-    // Place face bottom right on measured body top (slight overlap of 0.04 to hide the gap)
-    const faceBottomScaled = box.min.y * fScale
-    const posY = bodyTopY - faceBottomScaled - 0.04
+    // bottom of face in world space = bodyTopY (with slight 0.04 overlap to hide gap)
+    const faceBottomWorld = box.min.y * fScale
+    const posY = bodyTopY - faceBottomWorld - 0.04
 
     return {
       faceClone: clone,
@@ -92,7 +53,58 @@ function FaceModel({ url, bodyTopY }: { url: string; bodyTopY: number }) {
   )
 }
 
-// ─── Spinner ─────────────────────────────────────────────────────────────────
+// ─── CharacterGroup: loads body STL first, then positions face on real bodyTopY ─
+// This ensures bodyTopY is always computed before FaceModel renders.
+function CharacterGroup({
+  bodyUrl,
+  bodyColor,
+  faceUrl,
+}: {
+  bodyUrl: string
+  bodyColor: string
+  faceUrl: string | null
+}) {
+  const geometry = useLoader(STLLoader, bodyUrl)   // suspends until body STL loads
+
+  const { scale, centerOffset, bodyTopY } = useMemo(() => {
+    geometry.computeVertexNormals()
+    geometry.computeBoundingBox()
+    const box = geometry.boundingBox!
+    const center = new THREE.Vector3()
+    box.getCenter(center)
+    const size = new THREE.Vector3()
+    box.getSize(size)
+    const maxDim = Math.max(size.x, size.y, size.z)
+    const s = maxDim > 0 ? 2.2 / maxDim : 1
+    const topY = (box.max.y - center.y) * s   // actual body top in world units
+    return {
+      scale: s,
+      centerOffset: [-center.x, -center.y, -center.z] as [number, number, number],
+      bodyTopY: topY,
+    }
+  }, [geometry])
+
+  return (
+    <>
+      {/* Body */}
+      <group scale={scale}>
+        <mesh position={centerOffset} castShadow receiveShadow>
+          <primitive object={geometry} attach="geometry" />
+          <meshStandardMaterial color={bodyColor} roughness={0.4} metalness={0.08} envMapIntensity={0.6} />
+        </mesh>
+      </group>
+
+      {/* Face — sits on top of body using real bodyTopY */}
+      {faceUrl && (
+        <Suspense key={faceUrl} fallback={null}>
+          <FaceModel url={faceUrl} bodyTopY={bodyTopY} />
+        </Suspense>
+      )}
+    </>
+  )
+}
+
+// ─── Spinner ──────────────────────────────────────────────────────────────────
 function Spinner() {
   const ref = useRef<THREE.Mesh>(null)
   useFrame((s) => { if (ref.current) ref.current.rotation.y = s.clock.elapsedTime * 2 })
@@ -122,8 +134,6 @@ export default function CharacterViewer({
   className = '',
   interactive = true,
 }: CharacterViewerProps) {
-  const [bodyTopY, setBodyTopY] = useState<number>(1.0)
-
   return (
     <div
       className={`w-full h-full ${className}`}
@@ -141,17 +151,11 @@ export default function CharacterViewer({
         <directionalLight position={[-5, 4, 2]} intensity={0.6} color="#FFF3CC" />
         <directionalLight position={[1, -3, -4]} intensity={0.25} color="#C8DDFF" />
 
-        {/* Single RotatingGroup → body + face always rotate in sync */}
         <RotatingGroup autoRotate={!interactive}>
+          {/* Body loads first → bodyTopY is ready → FaceModel gets correct Y */}
           <Suspense fallback={<Spinner />}>
-            <BodyModel url={bodyUrl} color={bodyColor} onBodyTop={setBodyTopY} />
+            <CharacterGroup bodyUrl={bodyUrl} bodyColor={bodyColor} faceUrl={faceUrl} />
           </Suspense>
-
-          {faceUrl && (
-            <Suspense key={faceUrl} fallback={null}>
-              <FaceModel url={faceUrl} bodyTopY={bodyTopY} />
-            </Suspense>
-          )}
         </RotatingGroup>
 
         {interactive && (
