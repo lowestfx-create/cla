@@ -29,13 +29,13 @@ function FaceModel({ url, bodyTopY }: { url: string; bodyTopY: number }) {
     box.getSize(size)
     const maxDim = Math.max(size.x, size.y, size.z)
 
-    // Body STL includes a head — scale face to match built-in head proportions
-    // (LEGO head ~23% of total figure height = 0.23 × 2.2 ≈ 0.52 world units)
-    const fScale = maxDim > 0 ? 0.52 / maxDim : 1
+    // LEGO head ~27% of total figure height = 0.27 × 2.2 ≈ 0.60 world units
+    const targetHeadSize = bodyTopY * 0.54   // head height ≈ 54% of top half
+    const fScale = maxDim > 0 ? targetHeadSize / maxDim : 1
 
-    // Neck (head-body joint) sits at ~50% of bodyTopY above centre
-    // bodyTopY ≈ 1.1 → neck ≈ 0.55 → face bottom goes there
-    const neckY = bodyTopY * 0.50
+    // Head spans from neck (~72% of total height) to top (100%)
+    // In centered world space: neckY ≈ bodyTopY * 0.46
+    const neckY = bodyTopY * 0.46
     const facePositionY = neckY - box.min.y * fScale
 
     return {
