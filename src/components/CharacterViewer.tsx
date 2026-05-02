@@ -63,8 +63,7 @@ function FaceModel({ url, bodyTopY }: { url: string; bodyTopY: number }) {
   }, [scene, bodyTopY])
 
   return (
-    // rotation-y = π flips the face to face the camera (GLB front faces +Z, camera looks from +Z → flip)
-    <group scale={faceScale} position={facePosition} rotation={[0, Math.PI, 0]}>
+    <group scale={faceScale} position={facePosition}>
       <primitive object={faceClone} />
     </group>
   )
